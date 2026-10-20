@@ -16,7 +16,10 @@ This repository is an experiment, not a medical device. See
 Default run: the stratified 3,000-image subset (1,000 per class, `--fraction
 0.2 --seed 20261020`), model `jev-1.14.0`, one request per image. Graded once,
 after all predictions were frozen. Full metrics in
-[`reports/run.json`](reports/run.json).
+[`reports/run.json`](reports/run.json). These numbers were produced with the
+pre-tuning question bank; the shipped bank is the tuned one described in
+[Question tuning](#question-tuning), which validates 0.91 vs 0.89 on 99
+held-out images (`python scripts/01_run.py` regenerates the run with it).
 
 | Metric | Value |
 |---|---:|
@@ -176,6 +179,34 @@ The subset is drawn by `jev_cancer.index.select_subset`:
   no class can be drowned out;
 - `--seed` (default `20261020`) makes the draw reproducible: the same seed on
   the same dataset yields the identical subset on any machine.
+
+## Question tuning
+
+The question bank was fine-tuned by a controlled iteration experiment — 48
+iterations / 836 image-tests of variant question banks on fixed stratified
+panels, guided by error analysis and the medical-VLM prompting literature. Full
+method, score trend and findings in
+[`reports/tuning.md`](reports/tuning.md); harness in `experiments/tune.py`.
+
+What the experiment established:
+
+- **Binary accuracy (normal vs carcinoma) is 1.000 for every question bank
+  tested.** All tunable signal lives in the glandular-vs-keratinizing split.
+- **The 42 atomic observations carry the class signal; the holistic Choices are
+  the weak link.** The rubric alone beats the full bank on the hard tiles
+  (ablation, iter 6): on those tiles the Choice voted "solid sheets dominate"
+  while `a_glands` had already seen the gland rings.
+- **Descriptions must define differentiation, not dominant texture.** The
+  winning bank (`v21`, iter 33–45) makes `p0` claim solid fields with clear
+  gland evidence and makes `p2` *require* a keratinizing tie-breaker — plus
+  strict ≥2-example criteria on the two hallucination-prone keratin
+  observations. Validated **0.91 vs 0.89 baseline** on 99 held-out images.
+- **One-sided fixes overfit a 10-image panel.** A "glands anywhere" clause
+  scored 1.00 on the tuning panel and flipped a holdout squamous tile (iter 9
+  vs 14). Every variant in the trend is scored on both panels for this reason.
+- **The residual errors are the documented clinical hard case**: solid
+  glandular vs poorly differentiated keratinizing growth, which practice
+  resolves with p40/TTF-1 stains, not with better wording.
 
 ## Reproduce
 

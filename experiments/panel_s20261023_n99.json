@@ -1,0 +1,505 @@
+{
+  "seed": 20261023,
+  "per_class": {
+    "adenocarcinoma": 33,
+    "benign": 33,
+    "squamous_cell_carcinoma": 33
+  },
+  "images": [
+    {
+      "id": "img_000231",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4031.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_000494",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2265.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_000513",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/1748.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_000516",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0839.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_000567",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4283.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_000757",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0013.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_000903",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3011.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_000987",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2849.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_000999",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1673.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_001027",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/1587.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_001046",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2573.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_001302",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0697.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_001857",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4429.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_001895",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2952.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_002005",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4011.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_002453",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/2613.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_002912",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0059.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_003356",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0633.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_003450",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0977.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_003549",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2397.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_003572",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4527.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_003752",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3106.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_003838",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1643.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_003890",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0481.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_004361",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3835.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_004493",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/1799.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_004627",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3821.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_004707",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3104.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_004811",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0096.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_004921",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0187.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_004975",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/3585.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_005509",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4111.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_005599",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1714.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_005768",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2560.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_005911",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/3469.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_005935",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/2526.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006163",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4804.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_006236",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4612.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_006279",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4556.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006345",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/1367.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_006464",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/3798.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_006518",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4205.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006672",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0698.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_006742",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4065.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006765",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1802.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006805",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3851.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_006830",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0718.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_006984",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0128.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_007005",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3861.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_007149",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4177.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_007275",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4873.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_007486",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3993.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_007657",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/1550.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_007730",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4037.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_007812",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4289.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_007939",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4499.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_007994",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2980.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_008112",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3847.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_008541",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/3323.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_008648",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/2876.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_008684",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0885.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_008746",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2171.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_009033",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2399.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_009188",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3457.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_009236",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2630.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_009272",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4405.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_009668",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4836.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_009755",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/1159.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_009853",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4490.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_009945",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0192.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_009954",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2196.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_010086",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1221.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_010381",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2795.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_010939",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/0866.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_011226",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2324.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_011236",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2830.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_011480",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3469.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_012305",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/1233.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_012387",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4257.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_012590",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/1273.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_012729",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3634.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_012781",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/3852.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_013063",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0410.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_013076",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0031.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_013427",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2644.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_013520",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/3706.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_013923",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/4294.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_013966",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0445.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_014070",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0271.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_014122",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4803.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_014162",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/0781.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_014258",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/0458.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_014449",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/2066.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_014464",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2395.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_014659",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/adenocarcinoma/2816.jpg",
+      "class": "adenocarcinoma"
+    },
+    {
+      "id": "img_014732",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/squamous_cell_carcinoma/4228.jpg",
+      "class": "squamous_cell_carcinoma"
+    },
+    {
+      "id": "img_014833",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/2962.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_014843",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/1209.jpg",
+      "class": "benign"
+    },
+    {
+      "id": "img_014943",
+      "source": "/home/amr-devman/.cache/kagglehub/datasets/rm1000/lung-cancer-histopathological-images/versions/1/benign/4512.jpg",
+      "class": "benign"
+    }
+  ]
+}

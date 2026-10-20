@@ -80,11 +80,12 @@ def build_signals(response: dict[str, Any]) -> dict[str, np.ndarray]:
     }
 
 
-def fuse(signals: dict[str, np.ndarray]) -> np.ndarray:
+def fuse(signals: dict[str, np.ndarray], weights: dict[str, float] | None = None) -> np.ndarray:
+    weights = weights if weights is not None else WEIGHTS
     total = 0.0
     combined = np.zeros(3)
     for name, signal in signals.items():
-        weight = WEIGHTS.get(name, 0.0)
+        weight = weights.get(name, 0.0)
         if weight <= 0:
             continue
         combined += weight * normalize(signal)

@@ -24,7 +24,7 @@ from typing import Any
 
 from .config import BANNED_PROMPT_TERMS, PROFILE_IDS
 
-PROTOCOL_VERSION = "2026-10-21.described"
+PROTOCOL_VERSION = "2026-10-21.tuned"
 
 # Outcome descriptions shared by every yes/no observation. They fix the
 # polarity ("yes" = the described property is clearly present) and tell the
@@ -33,6 +33,24 @@ NOUL_CRITERIA = {
     "true": "The described property is clearly visible in the image.",
     "false": "The property is absent, too faint to be sure, or only a doubtful hint.",
 }
+
+# The two keratinizing tie-breakers are the most hallucination-prone
+# observations (fine bridges and whorls are easily mimicked by cutting
+# artefact), and they decide the adeno/squamous boundary. Tuning
+# (reports/tuning.md, iteration 33) showed a >=2-example threshold keeps them
+# from firing on doubtful single hints without losing real positives.
+STRICT_CRITERIA = {
+    "true": (
+        "The described property is clearly visible in at least two separate places in the "
+        "image. One doubtful example, or an appearance that could be a cutting or staining "
+        "artefact, is not enough."
+    ),
+    "false": (
+        "The property is absent, appears at most once, too faint to be sure, or is only a "
+        "doubtful hint."
+    ),
+}
+FEATURE_CRITERIA = {"a_whorl": STRICT_CRITERIA, "a_spines": STRICT_CRITERIA}
 
 
 @dataclass(frozen=True)
@@ -198,19 +216,25 @@ FEATURE_IDS = tuple(feature.id for feature in FEATURES)
 
 PROFILE_TEXT: dict[str, str] = {
     "p0": (
-        "Glandular growth. Rounded or irregular rings of cells around an open central hole (a lumen), "
-        "lined by tall cells; pale blue-grey mucin pools between or inside the structures; dense pink "
-        "scar-like tissue separates the structures. Look for the ring-around-a-hole pattern."
+        "Glandular differentiation. Rings of cells around an open central hole (a lumen), lined "
+        "by tall cells; pale blue-grey mucin pools between or inside the cells; clear vacuoles "
+        "that push nuclei aside; dense pink scar-like tissue between the structures. Even when "
+        "most of the field is solid sheets, choose this description when well-formed gland rings "
+        "with open lumens are clearly present in at least two separate places. Mucin pools alone, "
+        "or spaces that merely look gland-like, are not enough. Judge the differentiation, not "
+        "the largest area."
     ),
     "p1": (
-        "Air-sac architecture. Several open, mostly empty spaces separated by very thin walls one or "
-        "two cells thick; little crowded cell growth; scattered dark pigment specks, red blood cells "
-        "and pale bubbly scavenger cells inside the spaces. Look for the open airy pattern."
+        "Air-sac architecture. Several open, mostly empty spaces separated by very thin walls one "
+        "or two cells thick; little crowded cell growth; scattered dark pigment specks, red blood "
+        "cells and pale bubbly scavenger cells inside the spaces. Look for the open airy pattern."
     ),
     "p2": (
-        "Solid cohesive growth. Broad islands or sheets of polygonal cells with abundant dense opaque "
-        "pink cytoplasm and sharply drawn cell borders; concentric onion-skin whorls of bright pink "
-        "material; dead pink debris in the centre of the islands. Look for the solid sheet pattern."
+        "Keratinizing solid differentiation. Broad islands or sheets of polygonal cells with "
+        "abundant dense opaque pink cytoplasm and sharply drawn cell borders, and at least one "
+        "keratinizing tie-breaker: concentric onion-skin whorls of bright pink keratin, fine "
+        "spine-like bridges between neighbouring cells, or intensely pink shrunken cells. Solid "
+        "sheets without a keratinizing tie-breaker do not fit this description."
     ),
 }
 
@@ -286,13 +310,14 @@ def build_questions() -> dict[str, Any]:
     for feature in FEATURES:
         questions[feature.id] = Noul(
             instructions=f"{feature.ask}\n\nWhat to look for: {feature.look}",
-            criteria=dict(NOUL_CRITERIA),
+            criteria=dict(FEATURE_CRITERIA.get(feature.id, NOUL_CRITERIA)),
         )
 
     questions["profile"] = Choice(
         instructions=(
-            "Which description best matches the dominant architecture in `sample`? Read the whole "
-            "field first, then pick the description whose pattern occupies the largest area."
+            "Which description matches the differentiation shown in `sample`? Look for the "
+            "specific tie-breaker features each description names, not just which texture covers "
+            "the largest area."
         ),
         criteria={profile: PROFILE_TEXT[profile] for profile in PROFILE_IDS},
     )
@@ -300,8 +325,8 @@ def build_questions() -> dict[str, Any]:
     # probability vectors are averaged, which reduces option-order bias.
     questions["profile_recheck"] = Choice(
         instructions=(
-            "Judge the architecture, not the staining. Which description fits the majority of the "
-            "field in `sample`?"
+            "Judge the differentiation, not the staining or the largest texture. Which "
+            "description fits `sample`?"
         ),
         criteria={profile: PROFILE_TEXT[profile] for profile in ("p2", "p0", "p1")},
     )
@@ -341,6 +366,7 @@ def question_signature() -> str:
     payload = {
         "version": PROTOCOL_VERSION,
         "features": [(feature.id, feature.ask, feature.look) for feature in FEATURES],
+        "feature_criteria": FEATURE_CRITERIA,
         "profiles": PROFILE_TEXT,
         "cell_shape": CELL_SHAPE_TEXT,
         "cytoplasm": CYTOPLASM_TEXT,
