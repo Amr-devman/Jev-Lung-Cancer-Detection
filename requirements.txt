@@ -1,0 +1,5 @@
+typesafe-sdk[pil]==0.7.5
+python-dotenv==1.2.4
+numpy>=2.0
+pillow>=10.0
+kagglehub>=0.3

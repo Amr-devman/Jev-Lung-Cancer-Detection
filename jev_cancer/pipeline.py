@@ -1,0 +1,132 @@
+"""One Jev request per image.
+
+State: the image. Questions: 42 clinical observations with plain-language
+descriptions and 5 morphology Choices. No reference images, no labels, no
+boxes, no second request.
+
+Raw answers are cached per image under ``runs/<protocol>/raw`` so any subset or
+rerun only pays for images that have not been seen yet. The per-run output
+directory is keyed by the subset's fraction and seed.
+"""
+
+from __future__ import annotations
+
+import json
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any
+
+from typesafe_sdk import Image as JevImage
+
+from . import config
+from .client import Jev, load_json, save_json
+from .index import load_rgb, subset_key
+from .protocol import PROFILE_IDS, assert_no_leaks, build_questions, question_signature
+
+
+def protocol_dir() -> Path:
+    return config.RUNS / question_signature()
+
+
+def run_dir(subset: dict) -> Path:
+    return protocol_dir() / subset_key(subset)
+
+
+def classify_one(jev: Jev, image_id: str, source: str, cache_dir: Path) -> dict[str, Any]:
+    path = cache_dir / "raw" / f"{image_id}.json"
+    if path.exists():
+        return {"image_id": image_id, "cached": True}
+
+    questions = build_questions()
+    assert_no_leaks(questions)
+    image = JevImage.from_pil(load_rgb(source))
+    started = time.perf_counter()
+    response = jev.ask({"sample": image}, questions)
+    response["latency_ms"] = round((time.perf_counter() - started) * 1000, 1)
+    save_json(path, response)
+    return {"image_id": image_id, "cached": False}
+
+
+def run_all(subset: dict, workers: int = config.DEFAULT_WORKERS) -> tuple[Path, list[dict]]:
+    images = subset["images"]
+    directory = run_dir(subset)
+    cache_dir = protocol_dir()
+    (cache_dir / "raw").mkdir(parents=True, exist_ok=True)
+    directory.mkdir(parents=True, exist_ok=True)
+
+    pending = [
+        item
+        for item in images
+        if not (cache_dir / "raw" / f"{item['id']}.json").exists()
+    ]
+    print(f"[run] {len(images)} images, {len(pending)} to do, {workers} workers")
+    print(f"[run] {directory}")
+
+    jev = Jev()
+    wall = time.perf_counter()
+    done = 0
+    errors = 0
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(classify_one, jev, item["id"], item["source"], cache_dir): item["id"]
+                for item in pending
+            }
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as exc:
+                    errors += 1
+                    print(f"[run] error: {type(exc).__name__}: {exc}")
+                done += 1
+                if done % 25 == 0 or done == len(pending):
+                    elapsed = time.perf_counter() - wall
+                    rate = done / elapsed if elapsed else 0
+                    eta = (len(pending) - done) / rate / 60 if rate else 0
+                    print(
+                        f"[run] {done}/{len(pending)}  {rate:.2f} img/s  eta {eta:.0f} min  "
+                        f"${jev.input_tokens * config.USD_PER_BTOK / 1e9:.4f}",
+                        flush=True,
+                    )
+    finally:
+        jev.close()
+
+    summary = {
+        "requested": len(images),
+        "pending_at_start": len(pending),
+        "errors": errors,
+        "requests": jev.requests,
+        "input_tokens": jev.input_tokens,
+        "cost_usd": jev.input_tokens * config.USD_PER_BTOK / 1e9,
+        "wall_seconds": round(time.perf_counter() - wall, 1),
+        "model": config.MODEL,
+        "protocol": question_signature(),
+        "subset": {key: value for key, value in subset.items() if key != "images"},
+    }
+    save_json(directory / "summary.json", summary)
+    print(json.dumps(summary, indent=2))
+    return directory, images
+
+
+def load_records(image_ids: list[str], cache_dir: Path | None = None) -> list[dict[str, Any]]:
+    cache_dir = cache_dir or (protocol_dir() / "raw")
+    records = []
+    for image_id in image_ids:
+        path = cache_dir / f"{image_id}.json"
+        if path.exists():
+            records.append({"image_id": image_id, "response": load_json(path)})
+    return records
+
+
+def feature_vector(response: dict[str, Any]) -> dict[str, float]:
+    return {
+        key: value["noul"]
+        for key, value in response["answers"].items()
+        if value.get("type") == "noul"
+    }
+
+
+def profile_probabilities(response: dict[str, Any], key: str = "profile") -> list[float]:
+    answer = response["answers"][key]
+    return [answer["probabilities"].get(profile, 0.0) for profile in PROFILE_IDS]

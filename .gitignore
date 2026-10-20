@@ -1,0 +1,19 @@
+# Environment: secrets live in .env, only the template is committed.
+.env
+.env.*
+!.env.sample
+
+# Environments and caches
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+
+# Experimentation and scratch work
+notebooks/
+scratch/
+*.log
+.DS_Store
+
+# Run logs and per-image Jev answers. Rebuild with scripts/01_run.py.
+runs/
