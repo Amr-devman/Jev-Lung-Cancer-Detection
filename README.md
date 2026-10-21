@@ -38,6 +38,10 @@ one, otherwise a 2x zoom), and four zoomed tiles covering the field's corners.
 
 ![six views of one field](docs/figures/views.jpg)
 
+Three predictions end to end, from pixels to label:
+
+![three predictions, from image to answers to label](docs/figures/flow.webp)
+
 Along with the pixels, the model answers 55 questions: 45 yes/no observations
 and 10 multiple-choice questions. Every question explains what to look for ("a
 swirl of concentric bright pink layers wrapped around a centre, like the layers
