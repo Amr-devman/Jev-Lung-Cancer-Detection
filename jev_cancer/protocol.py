@@ -219,8 +219,6 @@ FEATURES: tuple[Feature, ...] = (
         "lumpy nuclei, means the answer is no.", (-1.0, 2.0, -1.0)),
 )
 
-FEATURE_IDS = tuple(feature.id for feature in FEATURES)
-
 PROFILE_TEXT: dict[str, str] = {
     "p0": (
         "Glandular growth. Rounded or irregular rings of cells around an open central hole (a lumen), "

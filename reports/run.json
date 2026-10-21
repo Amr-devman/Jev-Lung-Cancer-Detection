@@ -165,12 +165,12 @@
   },
   "run": {
     "requested": 691,
-    "pending_at_start": 691,
+    "pending_at_start": 0,
     "errors": 0,
-    "requests": 691,
-    "input_tokens": 18672531,
-    "cost_usd": 0.784246302,
-    "wall_seconds": 57.3,
+    "requests": 0,
+    "input_tokens": 0,
+    "cost_usd": 0.0,
+    "wall_seconds": 0.0,
     "model": "jev-1.14.0",
     "protocol": "cee60e36d3f48f76",
     "subset": {

@@ -23,7 +23,7 @@ from typesafe_sdk import Image as JevImage
 from . import config
 from .client import Jev, load_json, save_json
 from .index import load_detail, load_rgb, load_tiles, magnification, sibling_at, subset_key
-from .protocol import PROFILE_IDS, assert_no_leaks, build_questions, question_signature
+from .protocol import assert_no_leaks, build_questions, question_signature
 
 
 def protocol_dir() -> Path:
@@ -147,8 +147,3 @@ def feature_vector(response: dict[str, Any]) -> dict[str, float]:
         for key, value in response["answers"].items()
         if value.get("type") == "noul"
     }
-
-
-def profile_probabilities(response: dict[str, Any], key: str = "profile") -> list[float]:
-    answer = response["answers"][key]
-    return [answer["probabilities"].get(profile, 0.0) for profile in PROFILE_IDS]

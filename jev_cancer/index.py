@@ -74,10 +74,6 @@ def build_index(source: Path | None = None, force: bool = False) -> dict:
     return payload
 
 
-def load_index() -> dict:
-    return json.loads(INDEX_JSON.read_text())
-
-
 def select_subset(
     index: dict,
     fraction: float | None = None,
