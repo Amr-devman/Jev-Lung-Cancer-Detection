@@ -20,57 +20,68 @@ predictions were frozen. Full metrics in [`reports/run.json`](reports/run.json).
 | Metric | Value |
 |---|---:|
 | Images evaluated | 691 (all) |
-| Accuracy | **71.8%** (95% CI 68.3–75.0, Wilson) |
-| Balanced accuracy | 71.8% |
-| Bootstrap 95% CI (2,000 resamples) | 68.5–75.1 |
-| Normal vs carcinoma (binary) | 93.2% |
+| Accuracy | **72.2%** (95% CI 68.8–75.4, Wilson) |
+| Balanced accuracy | 71.9% |
+| Bootstrap 95% CI (2,000 resamples) | 68.9–75.7 |
+| Normal vs carcinoma (binary) | 92.8% |
 
 Per class:
 
 | Class | n | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|
-| adenocarcinoma (`aca`) | 280 | 0.630 | 0.771 | 0.693 |
-| normal lung (`nor`) | 151 | 0.948 | 0.728 | 0.824 |
-| squamous cell carcinoma (`ssc`) | 260 | 0.733 | 0.654 | 0.691 |
+| adenocarcinoma (`aca`) | 280 | 0.637 | 0.779 | 0.701 |
+| normal lung (`nor`) | 151 | 0.947 | 0.709 | 0.811 |
+| squamous cell carcinoma (`ssc`) | 260 | 0.737 | 0.669 | 0.702 |
 
 Confusion matrix (rows = truth, columns = predicted):
 
 | | aca | nor | ssc |
 |---|---:|---:|---:|
-| **aca** | 216 | 6 | 58 |
-| **nor** | 37 | 110 | 4 |
-| **ssc** | 90 | 0 | 170 |
+| **aca** | 218 | 6 | 56 |
+| **nor** | 38 | 107 | 6 |
+| **ssc** | 86 | 0 | 174 |
 
 Confidence / coverage curve — the fused probability is an abstention knob, not
 a formality:
 
 | Min confidence | Coverage | Accuracy on covered |
 |---|---:|---:|
-| ≥ 0.5 | 92% | 73.8% |
-| ≥ 0.6 | 74% | 79.8% |
-| ≥ 0.7 | 53% | 85.3% |
-| ≥ 0.8 | 25% | 91.8% |
-| ≥ 0.9 | 5% | 100% |
+| ≥ 0.5 | 92% | 73.7% |
+| ≥ 0.6 | 73% | 80.8% |
+| ≥ 0.7 | 50% | 85.6% |
+| ≥ 0.8 | 22% | 92.1% |
+| ≥ 0.9 | 4% | 100% |
 
 ### Reading the numbers
 
 This dataset is much harder than the LC25000-style benchmarks where classical
 models reach the high 90s — ~72% here is a real signal, not a disappointment.
 
-- **The dominant error is still the glandular ↔ keratinizing boundary.** 148 of
-  the 194 errors are `aca ↔ ssc` (58 + 90). That is the known hard case of
+- **The dominant error is still the glandular ↔ keratinizing boundary.** 142 of
+  the 192 errors are `aca ↔ ssc` (56 + 86). That is the known hard case of
   H&E-only pathology: a solid-pattern glandular tumour and a poorly
   differentiated squamous tumour can both be sheets of atypical cells, and in
   practice the tie is broken with p40 / TTF-1 stains. The model has no stains.
-- **Normal tissue is over-called as carcinoma** (41 of 151 fields), but when
+- **Normal tissue is over-called as carcinoma** (44 of 151 fields), but when
   the model predicts `nor` it is right 95% of the time. The growth-arrangement
   question (organized within pre-existing structures vs infiltrative/expansile
   growth) is the cleanest single signal here: 131 of 151 normal fields answer
   "pre-existing structures".
 - **Confidence is informative and well calibrated at the top.** At the 0.8
-  threshold the model covers 25% of the set at 91.8% accuracy; at 0.9 it has
+  threshold the model covers 22% of the set at 92.1% accuracy; at 0.9 it has
   been right every time so far. A triage workflow could forward only the
   uncertain fraction to a human.
+- **Wording matters measurably, in both directions.** A controlled A/B on the
+  full dataset found that plain visual words ("onion-skin rings of bright pink
+  material", "shrivelled pink cells") find squamous growth far better than
+  medical jargon ("keratin pearls", "dyskeratotic cells"): an all-plain bank
+  reached the best-ever squamous recall (0.731) but collapsed on normal tissue
+  (0.576), where precise clinical concepts ("alveolar", "gland lumens") carry
+  structure the plain words lose. The shipped bank is the measured hybrid —
+  plain language on the keratin side, clinical precision on the alveolar and
+  gland side: 72.2% vs 71.8% all-clinical, 68.5% all-plain (hybrid vs the
+  original single-view baseline: 29 verdicts fixed vs 15 broken, paired sign
+  test p ≈ 0.05).
 
 ## The experiment
 

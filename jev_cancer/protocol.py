@@ -24,7 +24,7 @@ from typing import Any
 
 from .config import BANNED_PROMPT_TERMS, PROFILE_IDS
 
-PROTOCOL_VERSION = "2026-10-23.tour"
+PROTOCOL_VERSION = "2026-10-24.hybrid"
 
 # Every question states which view to use. The whole field is judged at low
 # power; fine structures (bridges, whorls, lumens, nuclear detail) are judged
@@ -120,12 +120,12 @@ FEATURES: tuple[Feature, ...] = (
         "Look for a surface covered by tall narrow cells standing side by side like a picket fence, "
         "with their dark nuclei sitting at different heights so the line of nuclei looks staggered.",
         (1.0, 0.5, -0.5)),
-    Feature("a_whorl", "Does `sample` contain a whorl of concentric, brightly pink material inside a group of cells?",
-        "Look for a swirling, onion-skin structure inside a group of cells: concentric layers of "
-        "bright pink material wrapped around a centre, like the rings of an onion.", (-1.0, -1.0, 2.5)),
-    Feature("a_spines", "Are fine spine-like connections visible between neighbouring cells?",
-        "Look closely at the narrow gaps between neighbouring cells in a solid group: fine, tiny "
-        "spine-like lines bridge the cells across the gaps.", (-0.5, -1.0, 2.0)),
+    Feature("a_whorl", "Does `sample` contain onion-skin rings of bright pink material inside a group of cells?",
+        "Look for a swirl of concentric bright pink layers wrapped around a centre, like the "
+        "layers of an onion.", (-1.0, -1.0, 2.5)),
+    Feature("a_spines", "Are there fine lines bridging the gaps between neighbouring cells?",
+        "Zoom into the thin gaps between cells in a solid group: tiny rung-like lines connect "
+        "the cells across the gaps.", (-0.5, -1.0, 2.0)),
     Feature("a_lepidic", "Do cells line existing air spaces in a single layer without filling the space?",
         "Look for cells growing as a single neat layer along the existing walls of air spaces, like "
         "wallpaper lining a room, without piling up or filling the space.", (1.5, 0.5, -1.0)),
@@ -139,12 +139,11 @@ FEATURES: tuple[Feature, ...] = (
         "Look at the open spaces: are they packed with sheets of cells, instead of being empty (air) "
         "or holding loose pale scavenger cells?", (1.0, -1.0, 0.5)),
     # --- Cytology ----------------------------------------------------------
-    Feature("c_dense_cytoplasm", "Do most cells have abundant, dense, opaque pink cytoplasm?",
-        "Look at the cell bodies: most cells have a lot of cytoplasm that is dense and opaque pink, so "
-        "the cells look plump and solid rather than mostly nucleus.", (-0.5, -0.5, 2.0)),
-    Feature("c_sharp_borders", "Do neighbouring cells have sharply defined borders rather than blending together?",
-        "Look at the edges between neighbouring cells: the boundaries are clearly drawn and each cell "
-        "reads as a separate tile, instead of the cells melting into one pink mass.", (0.0, -0.5, 2.0)),
+    Feature("c_dense_cytoplasm", "Do most cells have thick, dense, opaque pink bodies?",
+        "Cells should look plump and solid, filled with dense opaque pink, rather than being "
+        "mostly dark dot.", (-0.5, -0.5, 2.0)),
+    Feature("c_sharp_borders", "Do neighbouring cells have clearly drawn edges instead of blending into one pink mass?",
+        "Each cell should read as its own tile with a sharp border.", (0.0, -0.5, 2.0)),
     Feature("c_columnar", "Are most cells taller than they are wide?",
         "Look at the shape of most cells: they are taller than wide, like columns, with the nucleus "
         "sitting toward the base of the cell.", (2.0, -1.0, -1.0)),
@@ -179,12 +178,11 @@ FEATURES: tuple[Feature, ...] = (
     Feature("c_hobnail", "Do some cells bulge into an open space with the nucleus at the outer tip?",
         "Look at the cells lining an open space: some bulge into it like a thumb pushing into a "
         "balloon, with the nucleus sitting at the bulging outer tip.", (1.5, 0.0, -0.5)),
-    Feature("c_polygonal", "Are most cells flattened or polygonal with angular outlines?",
-        "Look at the shape of most cells: they are angular, polygonal or flattened, with straight-ish "
-        "edges and clear corners, like floor tiles.", (-0.5, 0.0, 1.5)),
-    Feature("c_shrunken", "Are there individual cells with shrunken, intensely pink cytoplasm and a small dark nucleus?",
-        "Look for single cells that have died and shrunk: small cells with intensely pink dense "
-        "cytoplasm and a tiny condensed dark nucleus.", (-0.5, -0.5, 2.0)),
+    Feature("c_polygonal", "Are most cells angular and flat-sided, like floor tiles?",
+        "Look for straight-ish edges and corners, a paving-stone pattern.", (-0.5, 0.0, 1.5)),
+    Feature("c_shrunken", "Are there single dead-looking cells: small, intensely pink, with a tiny dark dot?",
+        "Look for lone shrivelled cells that stain bright pink with a condensed speck of a dot.",
+        (-0.5, -0.5, 2.0)),
     Feature("c_cilia", "Are there hair-like cilia on the surface of the cells?",
         "Look at the surface of cells lining an open space: fine hair-like lines (cilia) stick out "
         "from the surface like a tiny brush border.", (-0.5, 1.5, -0.5)),
@@ -339,24 +337,22 @@ ARRANGEMENT_SIGNAL = {
 # contrastive forced choice. Independent yes/no questions default to agreement;
 # naming both alternatives and forcing the pick uses the model's discrimination.
 DIFFERENTIATION_TEXT = {
-    "gland_type": (
-        "Well-formed glands are visible: rings of cells around open lumens lined by tall cells, or "
-        "definite pale blue-grey mucin pools. Spaces that merely look gland-like, or pale material "
-        "without a formed gland, do not count. These are the tie-breakers of glandular "
-        "differentiation."
+    "rings_and_goo": (
+        "Well-formed rings of cells around open holes lined by tall cells, or definite pools of "
+        "pale grey-blue goo, are visible. Spaces that merely look ring-like, or pale material "
+        "without a formed ring, do not count."
     ),
-    "keratin_type": (
-        "Concentric whorls of bright pink keratin, fine spine-like bridges between neighbouring "
-        "cells, or dense opaque keratinizing cytoplasm are visible. These are the tie-breakers of "
-        "keratinizing differentiation."
+    "hard_pink_material": (
+        "Onion-skin rings of bright pink material, fine lines bridging neighbouring cells, or "
+        "thick dense opaque pink cell bodies are visible."
     ),
-    "both_present": "Clear tie-breakers of both kinds are visible in the field.",
-    "neither_clear": "No clear tie-breaker of either kind is visible.",
+    "both_kinds": "Clear examples of both kinds are visible.",
+    "neither_clear": "No clear example of either kind is visible.",
 }
 DIFFERENTIATION_SIGNAL = {
-    "gland_type": (1.0, 0.0, 0.0),
-    "keratin_type": (0.0, 0.0, 1.0),
-    "both_present": (0.5, 0.0, 0.5),
+    "rings_and_goo": (1.0, 0.0, 0.0),
+    "hard_pink_material": (0.0, 0.0, 1.0),
+    "both_kinds": (0.5, 0.0, 0.5),
     "neither_clear": (1 / 3, 1 / 3, 1 / 3),
 }
 
@@ -365,42 +361,41 @@ DIFFERENTIATION_SIGNAL = {
 # keratinizing fields. Both force the pick between the mimic and the real
 # structure instead of asking about presence.
 LUMEN_TEXT = {
-    "lined_gland_lumens": (
-        "Open spaces are ringed by a distinct layer of tall cells, with nuclei arranged like a "
-        "fence at the base of the layer — true gland lumens."
+    "lined_holes": (
+        "The open spaces are ringed by a distinct layer of tall cells, with dark dots lined up "
+        "like a fence at the base of the layer — true ring-with-hole structures."
     ),
     "unlined_holes": (
-        "Irregular open holes are punched through solid sheets of cells, with no lining cell "
-        "layer around them."
+        "Irregular open holes are punched through solid sheets of cells, with no lining layer "
+        "around them."
     ),
-    "slit_like_gaps": (
-        "Narrow slit-like gaps sit between cells in solid sheets — intercellular spaces, not "
-        "gland lumens."
+    "slit_gaps": (
+        "Narrow slit-like gaps sit between cells in solid sheets — just the spaces between "
+        "neighbours, not ring holes."
     ),
-    "no_open_spaces": "No open gland-like spaces are visible in the field.",
+    "no_open_spaces": "No open ring-like spaces are visible in the field.",
 }
 LUMEN_SIGNAL = {
-    "lined_gland_lumens": (1.0, 0.0, 0.0),
+    "lined_holes": (1.0, 0.0, 0.0),
     "unlined_holes": (0.2, 0.0, 0.8),
-    "slit_like_gaps": (0.2, 0.0, 0.8),
+    "slit_gaps": (0.2, 0.0, 0.8),
     "no_open_spaces": (1 / 3, 1 / 3, 1 / 3),
 }
 
 KERATIN_TEXT = {
-    "keratin_pearls": (
-        "Concentric onion-skin whorls of dense bright pink keratin with a solid centre are "
-        "visible — keratin pearls."
+    "pink_onion_rings": (
+        "Concentric onion-skin rings of dense bright pink material with a solid centre are "
+        "visible."
     ),
-    "dyskeratotic_cells": (
-        "Individual cells with shrunken, dense bright pink cytoplasm and a small condensed "
-        "nucleus are visible — dyskeratotic cells."
+    "shrivelled_pink_cells": (
+        "Lone shrivelled cells with intensely pink dense bodies and a tiny dark dot are visible."
     ),
-    "both_kinds": "Both keratin pearls and dyskeratotic cells are visible.",
-    "neither": "No keratin pearls and no dyskeratotic cells are visible.",
+    "both_kinds": "Both kinds are visible.",
+    "neither": "Neither kind is visible.",
 }
 KERATIN_SIGNAL = {
-    "keratin_pearls": (0.0, 0.0, 1.0),
-    "dyskeratotic_cells": (0.15, 0.0, 0.85),
+    "pink_onion_rings": (0.0, 0.0, 1.0),
+    "shrivelled_pink_cells": (0.15, 0.0, 0.85),
     "both_kinds": (0.0, 0.0, 1.0),
     "neither": (1 / 3, 1 / 3, 1 / 3),
 }
@@ -451,18 +446,17 @@ def build_questions() -> dict[str, Any]:
         "description fits?"
     ), ARRANGEMENT_TEXT)
     choice("differentiation", (
-        "When `sample` shows both gland-like structures and solid sheets, decide which "
-        "differentiation the cells are showing. Look for the tie-breakers named in each option "
-        "anywhere in `sample`, checking fine cellular detail on `high_power` and the tour tiles. "
-        "Judge the type of differentiation, not the largest texture."
+        "When `sample` shows both ring-like structures and solid sheets, decide which kind of "
+        "growth the cells show. Look for the tie-breakers named in each option anywhere in "
+        "`sample`, checking fine detail on `high_power` and the tour tiles. Judge the type of "
+        "growth, not the largest texture."
     ), DIFFERENTIATION_TEXT)
     choice("lumen_type", (
-        "Look at the open spaces inside epithelial cell groups. Which description fits those "
-        "spaces?"
+        "Look at the open spaces inside the cell groups. Which description fits those spaces?"
     ), LUMEN_TEXT)
     choice("keratin_evidence", (
-        "Look across the whole field — every tour tile and `high_power` — for keratinizing "
-        "features. Which is visible?"
+        "Look across the whole field — every tour tile and `high_power` — for the hard bright-"
+        "pink features. Which is visible?"
     ), KERATIN_TEXT)
     return questions
 

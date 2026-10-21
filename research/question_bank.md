@@ -21,16 +21,23 @@ diagnosis, a dataset folder, or a filename.
    central open hole … circles, ovals, crooked rings, crescents or short
    tubes"). A question the model cannot ground in pixels is a coin flip; the
    description is what turns vocabulary into a visual task.
-3. **Descriptive, not diagnostic.** "A whorl of concentric pink material", not
+3. **Words the model knows — measured, not assumed.** A controlled A/B on the
+   full dataset (README, "Reading the numbers") showed plain visual words win
+   on the hard-pink/keratinizing side ("onion-skin rings of bright pink" beat
+   "keratin pearls": +7.7pp squamous recall) while precise clinical concepts
+   win on the alveolar and gland side (an all-plain bank collapsed normal
+   recall by 15.2pp). The shipped bank is the measured hybrid.
+4. **Descriptive, not diagnostic.** "A whorl of concentric pink material", not
    "a keratin pearl". "Open air spaces with thin walls", not "normal lung". The
    mapping from observation to entity lives in code, where it can be audited.
-4. **Visible in a single field of view.** No questions about invasion,
+5. **Visible in a single field of view.** No questions about invasion,
    metastasis, pleural spread, or molecular status.
-5. **Balanced polarity.** Every question is phrased so that "yes" means the
+6. **Balanced polarity.** Every question is phrased so that "yes" means the
    property is present. Each Noul carries shared outcome criteria: `true` = the
    property is clearly visible, `false` = absent, too faint, or a doubtful hint.
-6. **One image per request.** No reference images and no labels are ever in the
-   state; the model sees the tile and the question bank, nothing else.
+7. **One request per image.** No reference images and no labels are ever in the
+   state; the model sees the six views of the field and the question bank,
+   nothing else.
 
 ## Neutral profiles
 
@@ -73,14 +80,14 @@ against.
 | `a_single_file` | Do cells run in single-file lines through fibrous tissue? | Cells marching one behind the other through fibrous tissue, like beads on a string. | ++ | − | − |
 | `a_necrosis` | Do the centres of cell islands contain structureless pink debris or fragmented nuclei? | Dead tissue at the centre of large cell groups: shapeless pink debris or broken dark nuclear fragments. | + | − | ++ |
 | `a_surface_columnar` | Is there a surface lining of tall cells whose nuclei sit at different heights? | Tall narrow cells side by side like a picket fence with staggered nuclear heights. | + | + | − |
-| `a_whorl` | Does the field contain a whorl of concentric, brightly pink material inside a group of cells? | Onion-skin layers of bright pink material wrapped around a centre inside a cell group. | − | − | +++ |
-| `a_spines` | Are fine spine-like connections visible between neighbouring cells? | Fine spine-like lines bridging the narrow gaps between cells in a solid group. | − | − | +++ |
+| `a_whorl` | Does the field contain onion-skin rings of bright pink material inside a group of cells? | A swirl of concentric bright pink layers wrapped around a centre, like onion layers. | − | − | +++ |
+| `a_spines` | Are there fine lines bridging the gaps between neighbouring cells? | Tiny rung-like lines connecting cells across the thin gaps in a solid group. | − | − | +++ |
 | `a_lepidic` | Do cells line existing air spaces in a single layer without filling the space? | A single neat layer of cells along the walls of air spaces, like wallpaper, without filling them. | ++ | + | − |
 | `a_micropapillary` | Are there small tufts of cells floating in open spaces without a fibrous core? | Small free-floating tufts of cells inside open spaces, with no supporting core. | ++ | − | – |
 | `a_cribriform` | Are there sieve-like spaces within a solid group of cells? | A solid cell group riddled with small round holes, like a sieve or swiss cheese. | ++ | − | – |
 | `a_airspace_filling` | Are open spaces filled by sheets of cells rather than by air or macrophages? | Open spaces packed with sheets of cells, versus empty or holding pale scavenger cells. | + | − | + |
-| `c_dense_cytoplasm` | Do most cells have abundant, dense, opaque pink cytoplasm? | Cell bodies that are dense opaque pink, so cells look plump and solid rather than mostly nucleus. | − | − | +++ |
-| `c_sharp_borders` | Do neighbouring cells have sharply defined borders rather than blending together? | Clearly drawn cell boundaries, each cell a separate tile, not a merged pink mass. | – | − | +++ |
+| `c_dense_cytoplasm` | Do most cells have thick, dense, opaque pink bodies? | Plump solid cells filled with dense opaque pink, not mostly dark dot. | − | − | +++ |
+| `c_sharp_borders` | Do neighbouring cells have clearly drawn edges instead of blending into one pink mass? | Each cell reads as its own tile with a sharp border. | – | − | +++ |
 | `c_columnar` | Are most cells taller than they are wide? | Column-shaped cells, taller than wide, with the nucleus toward the base. | ++ | − | − |
 | `c_vacuoles` | Do cells contain clear rounded vacuoles that push the nucleus to one side? | Clear round bubbles in the cell body displacing the dark nucleus. | ++ | – | − |
 | `c_signet` | Do cells contain a large pale vacuole that pushes the nucleus to the cell rim? | One large pale bubble filling the cell and squashing the nucleus flat against the rim. | ++ | – | − |
@@ -92,8 +99,8 @@ against.
 | `c_nuclear_contour` | Do many nuclei have irregular, angular or folded contours? | Nuclear outlines that are irregular, angular, notched or folded, not smooth circles. | + | – | + |
 | `c_chromatin` | Is the chromatin coarse and clumped in many nuclei? | Coarse, clumped nuclear texture like grains of dark sand, not fine and even. | + | – | + |
 | `c_hobnail` | Do some cells bulge into an open space with the nucleus at the outer tip? | Cells bulging into an open space like a thumb into a balloon, nucleus at the outer tip. | ++ | – | − |
-| `c_polygonal` | Are most cells flattened or polygonal with angular outlines? | Angular, polygonal or flattened cells with straight-ish edges, like floor tiles. | − | – | ++ |
-| `c_shrunken` | Are there individual cells with shrunken, intensely pink cytoplasm and a small dark nucleus? | Single dead shrunken cells: intensely pink dense cytoplasm, tiny condensed dark nucleus. | − | − | +++ |
+| `c_polygonal` | Are most cells angular and flat-sided, like floor tiles? | Straight-ish edges and corners, a paving-stone pattern. | − | – | ++ |
+| `c_shrunken` | Are there single dead-looking cells: small, intensely pink, with a tiny dark dot? | Lone shrivelled cells stained bright pink with a condensed speck of a dot. | − | − | +++ |
 | `c_cilia` | Are there hair-like cilia on the surface of the cells? | Fine hair-like lines sticking out of the cell surface like a tiny brush border. | − | ++ | − |
 | `b_pigment` | Is there black or dark brown granular pigment in the tissue? | Dark black or brown granular specks like soot, scattered in tissue or inside cells. | – | ++ | – |
 | `b_rbc` | Are red blood cells present outside blood vessels or within open spaces? | Tiny uniform red-orange discs outside vessels or loose in open spaces. | – | + | – |
@@ -156,9 +163,9 @@ decision Choices feed the fusion as soft evidence:
 | `stroma` | What lies between the epithelial structures? | thin alveolar walls, dense fibrous, inflamed, necrotic, minimal |
 | `proliferation_pattern` | If there is a crowded epithelial proliferation, which pattern fits? | glandular, solid/squamoid, neither clear |
 | `growth_arrangement` | How do the epithelial cells relate to the tissue layout? | pre-existing structures, infiltrative glands, expansile solid nests, no proliferation |
-| `differentiation` | When both gland-like structures and solid sheets are present, which differentiation do the tie-breakers show? | gland type (formed glands/mucin), keratin type (whorls/bridges/dense keratin), both, neither |
-| `lumen_type` | How are the open spaces inside epithelial cell groups made? | lined gland lumens, unlined holes, slit-like gaps, no open spaces |
-| `keratin_evidence` | Which keratinizing features are visible across the tour tiles? | keratin pearls, dyskeratotic cells, both, neither |
+| `differentiation` | When both ring-like structures and solid sheets are present, which kind of growth do the tie-breakers show? | rings and goo (formed rings/mucin pools), hard pink material (onion rings/bridge lines/dense pink bodies), both, neither |
+| `lumen_type` | How are the open spaces inside the cell groups made? | lined holes (fenced with tall cells), unlined holes, slit gaps, no open spaces |
+| `keratin_evidence` | Which hard bright-pink features are visible across the tour tiles? | onion rings of bright pink, shrivelled pink cells, both, neither |
 
 Each option is itself a short description ("pale, faintly blue-grey, abundant
 cytoplasm, often with a clear vacuole"), not a bare label, so the model compares

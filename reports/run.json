@@ -1,47 +1,47 @@
 {
   "total": 691,
-  "correct": 496,
-  "accuracy": 0.7178002894356006,
+  "correct": 499,
+  "accuracy": 0.7221418234442837,
   "accuracy_ci95": [
-    0.6831092829761,
-    0.750082972640144
+    0.6875839851438981,
+    0.7542433320460917
   ],
-  "balanced_accuracy": 0.7179171821555927,
+  "balanced_accuracy": 0.7188038231084589,
   "per_class": {
     "c0": {
       "support": 280,
-      "precision": 0.6297376093294461,
-      "recall": 0.7714285714285715,
-      "f1": 0.6934189406099519
+      "precision": 0.6374269005847953,
+      "recall": 0.7785714285714286,
+      "f1": 0.7009646302250804
     },
     "c1": {
       "support": 151,
-      "precision": 0.9482758620689655,
-      "recall": 0.7284768211920529,
-      "f1": 0.8239700374531834
+      "precision": 0.9469026548672567,
+      "recall": 0.7086092715231788,
+      "f1": 0.8106060606060607
     },
     "c2": {
       "support": 260,
-      "precision": 0.7327586206896551,
-      "recall": 0.6538461538461539,
-      "f1": 0.6910569105691057
+      "precision": 0.7372881355932204,
+      "recall": 0.6692307692307692,
+      "f1": 0.7016129032258064
     }
   },
   "matrix": [
     [
-      216,
+      218,
       6,
-      58
+      56
     ],
     [
-      37,
-      110,
-      4
+      38,
+      107,
+      6
     ],
     [
-      90,
+      86,
       0,
-      170
+      174
     ]
   ],
   "class_names": {
@@ -51,105 +51,105 @@
   },
   "confusion_named": {
     "aca": {
-      "aca": 216,
+      "aca": 218,
       "nor": 6,
-      "ssc": 58
+      "ssc": 56
     },
     "nor": {
-      "aca": 37,
-      "nor": 110,
-      "ssc": 4
+      "aca": 38,
+      "nor": 107,
+      "ssc": 6
     },
     "ssc": {
-      "aca": 90,
+      "aca": 86,
       "nor": 0,
-      "ssc": 170
+      "ssc": 174
     }
   },
   "per_class_named": {
     "aca": {
       "support": 280,
-      "precision": 0.6297376093294461,
-      "recall": 0.7714285714285715,
-      "f1": 0.6934189406099519
+      "precision": 0.6374269005847953,
+      "recall": 0.7785714285714286,
+      "f1": 0.7009646302250804
     },
     "nor": {
       "support": 151,
-      "precision": 0.9482758620689655,
-      "recall": 0.7284768211920529,
-      "f1": 0.8239700374531834
+      "precision": 0.9469026548672567,
+      "recall": 0.7086092715231788,
+      "f1": 0.8106060606060607
     },
     "ssc": {
       "support": 260,
-      "precision": 0.7327586206896551,
-      "recall": 0.6538461538461539,
-      "f1": 0.6910569105691057
+      "precision": 0.7372881355932204,
+      "recall": 0.6692307692307692,
+      "f1": 0.7016129032258064
     }
   },
   "accuracy_ci95_bootstrap": [
-    0.6845151953690304,
-    0.7510853835021708
+    0.6888567293777135,
+    0.7568740955137482
   ],
   "binary_normal_vs_carcinoma": {
-    "accuracy": 0.9319826338639653,
+    "accuracy": 0.9276410998552822,
     "total": 691
   },
   "confidence_curve": [
     {
       "threshold": 0.0,
       "coverage": 1.0,
-      "accuracy": 0.7178002894356006,
+      "accuracy": 0.7221418234442837,
       "count": 691
     },
     {
       "threshold": 0.4,
-      "coverage": 0.9942112879884226,
-      "accuracy": 0.7176128093158661,
-      "count": 687
+      "coverage": 0.9971056439942113,
+      "accuracy": 0.7227866473149492,
+      "count": 689
     },
     {
       "threshold": 0.5,
-      "coverage": 0.9175108538350217,
-      "accuracy": 0.7381703470031545,
-      "count": 634
+      "coverage": 0.918958031837916,
+      "accuracy": 0.7370078740157481,
+      "count": 635
     },
     {
       "threshold": 0.6,
-      "coverage": 0.7395079594790159,
-      "accuracy": 0.7984344422700587,
-      "count": 511
+      "coverage": 0.7250361794500724,
+      "accuracy": 0.8083832335329342,
+      "count": 501
     },
     {
       "threshold": 0.7,
-      "coverage": 0.5311143270622286,
-      "accuracy": 0.8528610354223434,
-      "count": 367
+      "coverage": 0.5021707670043415,
+      "accuracy": 0.8559077809798271,
+      "count": 347
     },
     {
       "threshold": 0.8,
-      "coverage": 0.2460202604920405,
-      "accuracy": 0.9176470588235294,
-      "count": 170
+      "coverage": 0.2199710564399421,
+      "accuracy": 0.9210526315789473,
+      "count": 152
     },
     {
       "threshold": 0.9,
-      "coverage": 0.04775687409551375,
+      "coverage": 0.04052098408104197,
       "accuracy": 1.0,
-      "count": 33
+      "count": 28
     }
   ],
   "per_class_accuracy": {
     "aca": {
       "n": 280,
-      "accuracy": 0.7714285714285715
+      "accuracy": 0.7785714285714286
     },
     "nor": {
       "n": 151,
-      "accuracy": 0.7284768211920529
+      "accuracy": 0.7086092715231788
     },
     "ssc": {
       "n": 260,
-      "accuracy": 0.6538461538461539
+      "accuracy": 0.6692307692307692
     }
   },
   "subset": {
@@ -168,11 +168,11 @@
     "pending_at_start": 691,
     "errors": 0,
     "requests": 691,
-    "input_tokens": 18777312,
-    "cost_usd": 0.788647104,
-    "wall_seconds": 58.0,
+    "input_tokens": 18672531,
+    "cost_usd": 0.784246302,
+    "wall_seconds": 57.3,
     "model": "jev-1.14.0",
-    "protocol": "4c6a8f4be5187d36",
+    "protocol": "cee60e36d3f48f76",
     "subset": {
       "fraction": 1.0,
       "seed": 20261020,
@@ -186,5 +186,5 @@
     },
     "predicted": 691
   },
-  "predictions_path": "/home/amr-devman/lab/jev-cancer/runs/lh700/4c6a8f4be5187d36/f1_s20261020/predictions.json"
+  "predictions_path": "/home/amr-devman/lab/jev-cancer/runs/lh700/cee60e36d3f48f76/f1_s20261020/predictions.json"
 }
