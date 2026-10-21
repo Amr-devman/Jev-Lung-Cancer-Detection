@@ -22,4 +22,3 @@ ignore = ["BLE001", "RUF046", "SIM108"]
 # Prompt text is kept as single readable strings.
 [tool.ruff.lint.per-file-ignores]
 "jev_cancer/protocol.py" = ["E501"]
-"experiments/*" = ["E501"]

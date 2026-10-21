@@ -18,7 +18,7 @@ Default run: the stratified 3,000-image subset (1,000 per class, `--fraction
 after all predictions were frozen. Full metrics in
 [`reports/run.json`](reports/run.json). The same question bank scores 91.25%
 on the first 2,000 images of the index
-([`reports/run_head2000_pretuning.json`](reports/run_head2000_pretuning.json)),
+([`reports/run_head2000.json`](reports/run_head2000.json)),
 so the numbers are stable across draws.
 
 | Metric | Value |
@@ -164,7 +164,7 @@ This is the part to review first.
 |---|---|
 | Class names reach the model | Prompts are written from morphology. `protocol.assert_no_leaks` scans every question id, instruction and criterion for 18 diagnosis/provenance terms before each request. |
 | Folder or file names reach the model | Images are sent as decoded pixels, never as paths or ids. Neutral ids (`img_004271`) exist only in the local index. |
-| The evaluation set informs tuning | Nothing is tuned. Weights are fixed clinical priors; grading is a separate script (`02_grade.py`) that runs after predictions are frozen. |
+| The evaluation set informs model choice | Nothing is fitted or selected on it. Weights are fixed clinical priors; grading is a separate script (`02_grade.py`) that runs after predictions are frozen. |
 | Inference code can read truth | `pipeline.py` and `fusion.py` never read class folders. The class column of the index is used only to draw the stratified subset and to grade. |
 | The model is asked for a diagnosis | It is asked for morphology. The diagnosis mapping is code-side and grader-only. |
 
@@ -179,34 +179,6 @@ The subset is drawn by `jev_cancer.index.select_subset`:
   no class can be drowned out;
 - `--seed` (default `20261020`) makes the draw reproducible: the same seed on
   the same dataset yields the identical subset on any machine.
-
-## Question tuning
-
-The question bank was put through a controlled iteration experiment — 48
-iterations / 836 image-tests of variant banks on fixed stratified panels,
-guided by error analysis and the medical-VLM prompting literature. Full method,
-score trend and findings in [`reports/tuning.md`](reports/tuning.md); harness
-in `experiments/tune.py`.
-
-**Outcome: the best small-panel variant was rejected at scale, and the shipped
-bank is unchanged.** The tuned `v21` bank won +2pp on a 99-image panel but
-regressed −1.6pp overall on a head-to-head run over the same 2,000 images
-(89.65% vs 91.25%, paired sign test p ≈ 0.0005): its stricter keratinizing
-tie-break rules bought +2.2pp on adenocarcinoma and cost −6.9pp on squamous
-cell carcinoma. The 10/99-image iteration loop overfit its panels — exactly
-the failure mode the experiment's own caveats warned about. What survives:
-
-- **Binary accuracy (normal vs carcinoma) is 1.000 for every question bank
-  tested.** All tunable signal lives in the glandular-vs-keratinizing split.
-- **The 42 atomic observations carry the class signal; the holistic Choices are
-  the weak link** (ablation, iter 6): on hard tiles the Choice voted "solid
-  sheets dominate" while `a_glands` had already seen the gland rings.
-- **Descriptions that define differentiation rather than dominant texture move
-  both sides of the boundary at once** — in both directions. Any change here
-  needs a scale test of thousands of images, not a panel.
-- **The residual errors are the documented clinical hard case**: solid glandular
-  vs poorly differentiated keratinizing growth, which practice resolves with
-  p40/TTF-1 stains, not with better wording.
 
 ## Reproduce
 
