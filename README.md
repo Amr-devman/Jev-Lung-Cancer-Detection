@@ -38,7 +38,8 @@ one, otherwise a 2x zoom), and four zoomed tiles covering the field's corners.
 
 ![six views of one field](docs/figures/views.jpg)
 
-Three predictions end to end, from pixels to label:
+Three predictions end to end, from pixels to label (also as
+[MP4](docs/figures/flow.mp4)):
 
 ![three predictions, from image to answers to label](docs/figures/flow.webp)
 

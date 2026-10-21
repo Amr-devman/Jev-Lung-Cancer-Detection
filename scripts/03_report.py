@@ -311,6 +311,32 @@ def frame_label(prediction: dict, truth: str, sample_no: int, path: Path) -> Ima
     return canvas
 
 
+def frames_to_mp4(frames: list[Image.Image], durations: list[int], path: Path) -> None:
+    """Encode the same frame sequence as an H.264 MP4 via ffmpeg."""
+    import subprocess
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        listing = []
+        for i, (frame, duration) in enumerate(zip(frames, durations, strict=True)):
+            frame_path = tmp_path / f"f{i:03d}.png"
+            frame.save(frame_path)
+            listing.append(f"file '{frame_path}'\nduration {duration / 1000:.3f}\n")
+        listing.append(f"file '{tmp_path / f'f{len(frames) - 1:03d}.png'}'\n")
+        (tmp_path / "list.txt").write_text("".join(listing))
+        subprocess.run(
+            [
+                "ffmpeg", "-y", "-loglevel", "error",
+                "-f", "concat", "-safe", "0", "-i", str(tmp_path / "list.txt"),
+                "-vsync", "vfr", "-pix_fmt", "yuv420p",
+                "-c:v", "libx264", "-preset", "slow", "-crf", "22",
+                "-movflags", "+faststart", str(path),
+            ],
+            check=True,
+        )
+
+
 def flow_video(payload: dict, index: dict, picked: dict[str, Path]) -> None:
     id_of = {Path(item["source"]).name: item["id"] for item in index["images"]}
     prediction_of = {p["image_id"]: p for p in payload["predictions"]}
@@ -337,6 +363,7 @@ def flow_video(payload: dict, index: dict, picked: dict[str, Path]) -> None:
         quality=82,
         method=4,
     )
+    frames_to_mp4(frames, durations, DOCS / "figures" / "flow.mp4")
 
 
 def main() -> int:
