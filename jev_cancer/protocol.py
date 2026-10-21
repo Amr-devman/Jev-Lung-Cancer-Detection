@@ -24,15 +24,18 @@ from typing import Any
 
 from .config import BANNED_PROMPT_TERMS, PROFILE_IDS
 
-PROTOCOL_VERSION = "2026-10-22.staged"
+PROTOCOL_VERSION = "2026-10-23.tour"
 
-# Every question states which view to use: the whole field and the same centre
-# at twice the magnification. Fine structures (bridges, whorls, nuclear detail)
-# are judged on `detail`; overall architecture on `sample`.
+# Every question states which view to use. The whole field is judged at low
+# power; fine structures (bridges, whorls, lumens, nuclear detail) are judged
+# on the high-power views, and the tour tiles cover the whole field so nothing
+# hides in the periphery.
 VIEWS = (
-    "\n\nViews: `sample` is the whole field; `detail` is the centre of the same field at twice "
-    "the magnification. Judge overall architecture on `sample` and fine cellular detail on "
-    "`detail`."
+    "\n\nViews: `sample` shows the whole field at low power. `high_power` is a "
+    "higher-magnification view of the same tissue. `tour_nw`, `tour_ne`, `tour_sw`, `tour_se` "
+    "are high-power tiles covering the four quadrants of the field. Judge overall architecture "
+    "on `sample`; judge fine cellular detail on `high_power` and the tour tiles. Before "
+    "concluding that a fine structure is absent, check every tour tile."
 )
 
 # Outcome descriptions shared by every yes/no observation. They fix the
@@ -357,6 +360,51 @@ DIFFERENTIATION_SIGNAL = {
     "neither_clear": (1 / 3, 1 / 3, 1 / 3),
 }
 
+# The two contrastive questions aimed at the aca-impersonator failure mode:
+# spaces that merely look gland-like were claiming gland evidence on
+# keratinizing fields. Both force the pick between the mimic and the real
+# structure instead of asking about presence.
+LUMEN_TEXT = {
+    "lined_gland_lumens": (
+        "Open spaces are ringed by a distinct layer of tall cells, with nuclei arranged like a "
+        "fence at the base of the layer — true gland lumens."
+    ),
+    "unlined_holes": (
+        "Irregular open holes are punched through solid sheets of cells, with no lining cell "
+        "layer around them."
+    ),
+    "slit_like_gaps": (
+        "Narrow slit-like gaps sit between cells in solid sheets — intercellular spaces, not "
+        "gland lumens."
+    ),
+    "no_open_spaces": "No open gland-like spaces are visible in the field.",
+}
+LUMEN_SIGNAL = {
+    "lined_gland_lumens": (1.0, 0.0, 0.0),
+    "unlined_holes": (0.2, 0.0, 0.8),
+    "slit_like_gaps": (0.2, 0.0, 0.8),
+    "no_open_spaces": (1 / 3, 1 / 3, 1 / 3),
+}
+
+KERATIN_TEXT = {
+    "keratin_pearls": (
+        "Concentric onion-skin whorls of dense bright pink keratin with a solid centre are "
+        "visible — keratin pearls."
+    ),
+    "dyskeratotic_cells": (
+        "Individual cells with shrunken, dense bright pink cytoplasm and a small condensed "
+        "nucleus are visible — dyskeratotic cells."
+    ),
+    "both_kinds": "Both keratin pearls and dyskeratotic cells are visible.",
+    "neither": "No keratin pearls and no dyskeratotic cells are visible.",
+}
+KERATIN_SIGNAL = {
+    "keratin_pearls": (0.0, 0.0, 1.0),
+    "dyskeratotic_cells": (0.15, 0.0, 0.85),
+    "both_kinds": (0.0, 0.0, 1.0),
+    "neither": (1 / 3, 1 / 3, 1 / 3),
+}
+
 
 def build_questions() -> dict[str, Any]:
     from typesafe_sdk import Choice, Noul
@@ -405,9 +453,17 @@ def build_questions() -> dict[str, Any]:
     choice("differentiation", (
         "When `sample` shows both gland-like structures and solid sheets, decide which "
         "differentiation the cells are showing. Look for the tie-breakers named in each option "
-        "anywhere in `sample`, checking fine cellular detail on `detail`. Judge the type of "
-        "differentiation, not the largest texture."
+        "anywhere in `sample`, checking fine cellular detail on `high_power` and the tour tiles. "
+        "Judge the type of differentiation, not the largest texture."
     ), DIFFERENTIATION_TEXT)
+    choice("lumen_type", (
+        "Look at the open spaces inside epithelial cell groups. Which description fits those "
+        "spaces?"
+    ), LUMEN_TEXT)
+    choice("keratin_evidence", (
+        "Look across the whole field — every tour tile and `high_power` — for keratinizing "
+        "features. Which is visible?"
+    ), KERATIN_TEXT)
     return questions
 
 
@@ -423,6 +479,8 @@ def question_signature() -> str:
         "proliferation_pattern": PROLIFERATION_PATTERN_TEXT,
         "arrangement": ARRANGEMENT_TEXT,
         "differentiation": DIFFERENTIATION_TEXT,
+        "lumen": LUMEN_TEXT,
+        "keratin": KERATIN_TEXT,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
 

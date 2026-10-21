@@ -28,26 +28,30 @@ from .protocol import (
     CELL_SHAPE_SIGNAL,
     CYTOPLASM_SIGNAL,
     DIFFERENTIATION_SIGNAL,
+    KERATIN_SIGNAL,
+    LUMEN_SIGNAL,
     PROLIFERATION_PATTERN_SIGNAL,
     STROMA_SIGNAL,
     rubric_vector,
 )
 
 WEIGHTS = {
-    "profile": 0.30,
-    "profile_recheck": 0.12,
-    "proliferation_pattern": 0.10,
-    "rubric": 0.15,
-    "cell_shape": 0.06,
-    "cytoplasm": 0.06,
-    "stroma": 0.06,
-    "arrangement": 0.10,
-    "differentiation": 0.12,
+    "profile": 0.28,
+    "profile_recheck": 0.10,
+    "proliferation_pattern": 0.08,
+    "rubric": 0.12,
+    "cell_shape": 0.05,
+    "cytoplasm": 0.05,
+    "stroma": 0.05,
+    "arrangement": 0.08,
+    "differentiation": 0.09,
+    "lumen_type": 0.05,
+    "keratin_evidence": 0.05,
 }
 STAGE1_SIGNALS = ("profile", "profile_recheck", "arrangement", "stroma", "rubric")
 STAGE2_SIGNALS = (
-    "profile", "profile_recheck", "proliferation_pattern",
-    "differentiation", "rubric", "cell_shape", "cytoplasm",
+    "profile", "profile_recheck", "proliferation_pattern", "differentiation",
+    "lumen_type", "keratin_evidence", "rubric", "cell_shape", "cytoplasm",
 )
 RUBRIC_TEMPERATURE = 6.0
 EPS = 1e-9
@@ -96,6 +100,8 @@ def build_signals(response: dict[str, Any]) -> dict[str, np.ndarray]:
         "stroma": mapped_choice(response, "stroma", STROMA_SIGNAL),
         "arrangement": mapped_choice(response, "growth_arrangement", ARRANGEMENT_SIGNAL),
         "differentiation": mapped_choice(response, "differentiation", DIFFERENTIATION_SIGNAL),
+        "lumen_type": mapped_choice(response, "lumen_type", LUMEN_SIGNAL),
+        "keratin_evidence": mapped_choice(response, "keratin_evidence", KERATIN_SIGNAL),
     }
 
 

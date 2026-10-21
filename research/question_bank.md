@@ -1,13 +1,16 @@
 # The Jev question bank
 
 `jev_cancer/protocol.py` is the executable version of this document. It contains
-45 yes/no observations and 8 multiple-choice questions, asked over two views of
-the same field — `sample` (whole field) and `detail` (centre at twice the
-magnification). Every question says which view to use and carries a
-plain-language **what to look for** description, so the model is told what the
-observation means and what it looks like in pixels before it answers. The
-prompts name morphology only. They never name a diagnosis, a dataset folder, or
-a filename.
+45 yes/no observations and 10 multiple-choice questions, asked over six views of
+the same field — `sample` (whole field at low power), `high_power` (the same
+tissue at genuine high magnification: the paired 40× field when the dataset
+ships one, else a 2× digital zoom), and four `tour_*` tiles covering the
+quadrants of the field at high power. Every question says which view to use,
+tells the model to check all tour tiles before concluding a fine structure is
+absent, and carries a plain-language **what to look for** description, so the
+model is told what the observation means and what it looks like in pixels
+before it answers. The prompts name morphology only. They never name a
+diagnosis, a dataset folder, or a filename.
 
 ## Design rules
 
@@ -143,7 +146,7 @@ weak evidence, not proof: a tumour can contain all of them.
 
 ## Multiple-choice questions
 
-Beside the architecture Choice (asked twice), five descriptive Choices and two
+Beside the architecture Choice (asked twice), five descriptive Choices and four
 decision Choices feed the fusion as soft evidence:
 
 | Choice | Question | Options |
@@ -154,24 +157,30 @@ decision Choices feed the fusion as soft evidence:
 | `proliferation_pattern` | If there is a crowded epithelial proliferation, which pattern fits? | glandular, solid/squamoid, neither clear |
 | `growth_arrangement` | How do the epithelial cells relate to the tissue layout? | pre-existing structures, infiltrative glands, expansile solid nests, no proliferation |
 | `differentiation` | When both gland-like structures and solid sheets are present, which differentiation do the tie-breakers show? | gland type (formed glands/mucin), keratin type (whorls/bridges/dense keratin), both, neither |
+| `lumen_type` | How are the open spaces inside epithelial cell groups made? | lined gland lumens, unlined holes, slit-like gaps, no open spaces |
+| `keratin_evidence` | Which keratinizing features are visible across the tour tiles? | keratin pearls, dyskeratotic cells, both, neither |
 
 Each option is itself a short description ("pale, faintly blue-grey, abundant
 cytoplasm, often with a clear vacuole"), not a bare label, so the model compares
 descriptions rather than decoding category names. `growth_arrangement` is the
 malignancy discriminator (organized within pre-existing structures vs new
-infiltrative/expansile growth); `differentiation` is the glandular-vs-keratinizing
-tie-breaker asked as one contrastive forced choice, which is more reliable than
-independent yes/no presence questions.
+infiltrative/expansile growth). `differentiation`, `lumen_type` and
+`keratin_evidence` are contrastive forced choices aimed at the
+glandular-vs-keratinizing boundary: each names the structure and its mimic
+(true lined gland lumens vs holes punched through solid sheets; keratin pearls
+vs dyskeratotic cells), because independent yes/no presence questions default
+to agreement and were claiming gland evidence on keratinizing fields.
 
 ## How answers become a class
 
-Nine signals are computed independently from the one response:
+Eleven signals are computed independently from the one response:
 
 - `profile` and `profile_recheck`: the two architecture Choice probability
   vectors;
 - `proliferation_pattern`, `cell_shape`, `cytoplasm`, `stroma`,
-  `growth_arrangement`, `differentiation`: each Choice probability vector
-  mapped through a fixed soft table onto p0/p1/p2;
+  `growth_arrangement`, `differentiation`, `lumen_type`, `keratin_evidence`:
+  each Choice probability vector mapped through a fixed soft table onto
+  p0/p1/p2;
 - `rubric`: the weighted 45-observation vector, passed through a softmax.
 
 They are decoded as a two-stage hierarchical decision with fixed clinical-prior

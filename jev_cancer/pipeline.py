@@ -22,7 +22,7 @@ from typesafe_sdk import Image as JevImage
 
 from . import config
 from .client import Jev, load_json, save_json
-from .index import load_detail, load_rgb, subset_key
+from .index import load_detail, load_rgb, load_tiles, magnification, sibling_at, subset_key
 from .protocol import PROFILE_IDS, assert_no_leaks, build_questions, question_signature
 
 
@@ -34,6 +34,28 @@ def run_dir(subset: dict) -> Path:
     return protocol_dir() / subset_key(subset)
 
 
+def build_state(source: str) -> dict[str, Any]:
+    """Six views of one tissue field.
+
+    ``sample`` is the whole field as given. ``high_power`` is a strictly
+    higher-magnification view of the same tissue: the genuine 40x sibling field
+    when the dataset ships one (matched by filename, code-side only), otherwise
+    a 2x digital zoom of the centre. The four ``tour_*`` tiles are 2x zoom
+    tiles covering the whole field at native pixel scale, so no keratin pearl
+    or bridge hides in the periphery.
+    """
+    path = Path(source)
+    state: dict[str, Any] = {"sample": JevImage.from_pil(load_rgb(path))}
+    pair = sibling_at(path, "40x") if magnification(path) == "20x" else None
+    if pair is not None:
+        state["high_power"] = JevImage.from_pil(load_rgb(pair))
+    else:
+        state["high_power"] = JevImage.from_pil(load_detail(path))
+    for name, tile in load_tiles(path).items():
+        state[name] = JevImage.from_pil(tile)
+    return state
+
+
 def classify_one(jev: Jev, image_id: str, source: str, cache_dir: Path) -> dict[str, Any]:
     path = cache_dir / "raw" / f"{image_id}.json"
     if path.exists():
@@ -41,12 +63,8 @@ def classify_one(jev: Jev, image_id: str, source: str, cache_dir: Path) -> dict[
 
     questions = build_questions()
     assert_no_leaks(questions)
-    state = {
-        "sample": JevImage.from_pil(load_rgb(source)),
-        "detail": JevImage.from_pil(load_detail(source)),
-    }
     started = time.perf_counter()
-    response = jev.ask(state, questions)
+    response = jev.ask(build_state(source), questions)
     response["latency_ms"] = round((time.perf_counter() - started) * 1000, 1)
     save_json(path, response)
     return {"image_id": image_id, "cached": False}

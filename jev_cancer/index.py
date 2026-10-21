@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import random
+import re
 from pathlib import Path
 
 from PIL import Image
@@ -177,3 +178,48 @@ def load_detail(
         Image.Resampling.LANCZOS,
     )
     return detail
+
+
+def load_tiles(path: str | Path, zoom: float = 2.0) -> dict[str, Image.Image]:
+    """Four high-power tiles covering the whole field (NW, NE, SW, SE).
+
+    The centre crop alone is blind to the periphery, where keratin pearls and
+    intercellular bridges often sit. These tiles are cut at native pixel scale
+    from the source, so each is sharp at twice the magnification of `sample`.
+    """
+    image = load_rgb(path, max_side=config.MAX_SIDE * 2)
+    width, height = image.size
+    half_w, half_h = width / (2 * zoom), height / (2 * zoom)
+    centres = {
+        "tour_nw": (width * 0.25, height * 0.25),
+        "tour_ne": (width * 0.75, height * 0.25),
+        "tour_sw": (width * 0.25, height * 0.75),
+        "tour_se": (width * 0.75, height * 0.75),
+    }
+    tiles = {}
+    for name, (cx, cy) in centres.items():
+        box = (cx - half_w, cy - half_h, cx + half_w, cy + half_h)
+        tile = image.crop(box)
+        tiles[name] = tile
+    return tiles
+
+
+def magnification(path: str | Path) -> str | None:
+    match = re.search(r"(\d+)x", Path(path).stem)
+    return match.group(0) if match else None
+
+
+def sibling_at(path: str | Path, wanted: str) -> Path | None:
+    """The same tissue field at another magnification, matched by filename.
+
+    LungHist700 files are named like ``aca_md_20x_94.jpg`` / ``aca_md_40x_94.jpg``
+    — class, grade, magnification, field id. This pairs them without touching
+    the metadata CSV. Code-side only, exactly like the class folders: nothing
+    about the pairing ever reaches the model as text.
+    """
+    path = Path(path)
+    mag = magnification(path)
+    if mag is None:
+        return None
+    candidate = path.with_name(path.stem.replace(mag, wanted) + path.suffix)
+    return candidate if candidate.exists() else None
