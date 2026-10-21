@@ -16,10 +16,10 @@ This repository is an experiment, not a medical device. See
 Default run: the stratified 3,000-image subset (1,000 per class, `--fraction
 0.2 --seed 20261020`), model `jev-1.14.0`, one request per image. Graded once,
 after all predictions were frozen. Full metrics in
-[`reports/run.json`](reports/run.json). These numbers were produced with the
-pre-tuning question bank; the shipped bank is the tuned one described in
-[Question tuning](#question-tuning), which validates 0.91 vs 0.89 on 99
-held-out images (`python scripts/01_run.py` regenerates the run with it).
+[`reports/run.json`](reports/run.json). The same question bank scores 91.25%
+on the first 2,000 images of the index
+([`reports/run_head2000_pretuning.json`](reports/run_head2000_pretuning.json)),
+so the numbers are stable across draws.
 
 | Metric | Value |
 |---|---:|
@@ -182,31 +182,31 @@ The subset is drawn by `jev_cancer.index.select_subset`:
 
 ## Question tuning
 
-The question bank was fine-tuned by a controlled iteration experiment — 48
-iterations / 836 image-tests of variant question banks on fixed stratified
-panels, guided by error analysis and the medical-VLM prompting literature. Full
-method, score trend and findings in
-[`reports/tuning.md`](reports/tuning.md); harness in `experiments/tune.py`.
+The question bank was put through a controlled iteration experiment — 48
+iterations / 836 image-tests of variant banks on fixed stratified panels,
+guided by error analysis and the medical-VLM prompting literature. Full method,
+score trend and findings in [`reports/tuning.md`](reports/tuning.md); harness
+in `experiments/tune.py`.
 
-What the experiment established:
+**Outcome: the best small-panel variant was rejected at scale, and the shipped
+bank is unchanged.** The tuned `v21` bank won +2pp on a 99-image panel but
+regressed −1.6pp overall on a head-to-head run over the same 2,000 images
+(89.65% vs 91.25%, paired sign test p ≈ 0.0005): its stricter keratinizing
+tie-break rules bought +2.2pp on adenocarcinoma and cost −6.9pp on squamous
+cell carcinoma. The 10/99-image iteration loop overfit its panels — exactly
+the failure mode the experiment's own caveats warned about. What survives:
 
 - **Binary accuracy (normal vs carcinoma) is 1.000 for every question bank
   tested.** All tunable signal lives in the glandular-vs-keratinizing split.
 - **The 42 atomic observations carry the class signal; the holistic Choices are
-  the weak link.** The rubric alone beats the full bank on the hard tiles
-  (ablation, iter 6): on those tiles the Choice voted "solid sheets dominate"
-  while `a_glands` had already seen the gland rings.
-- **Descriptions must define differentiation, not dominant texture.** The
-  winning bank (`v21`, iter 33–45) makes `p0` claim solid fields with clear
-  gland evidence and makes `p2` *require* a keratinizing tie-breaker — plus
-  strict ≥2-example criteria on the two hallucination-prone keratin
-  observations. Validated **0.91 vs 0.89 baseline** on 99 held-out images.
-- **One-sided fixes overfit a 10-image panel.** A "glands anywhere" clause
-  scored 1.00 on the tuning panel and flipped a holdout squamous tile (iter 9
-  vs 14). Every variant in the trend is scored on both panels for this reason.
-- **The residual errors are the documented clinical hard case**: solid
-  glandular vs poorly differentiated keratinizing growth, which practice
-  resolves with p40/TTF-1 stains, not with better wording.
+  the weak link** (ablation, iter 6): on hard tiles the Choice voted "solid
+  sheets dominate" while `a_glands` had already seen the gland rings.
+- **Descriptions that define differentiation rather than dominant texture move
+  both sides of the boundary at once** — in both directions. Any change here
+  needs a scale test of thousands of images, not a panel.
+- **The residual errors are the documented clinical hard case**: solid glandular
+  vs poorly differentiated keratinizing growth, which practice resolves with
+  p40/TTF-1 stains, not with better wording.
 
 ## Reproduce
 

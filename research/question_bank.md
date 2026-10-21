@@ -36,20 +36,12 @@ and is used only by the grader.
 
 | Profile | Description shown to the model | Morphologic family |
 |---|---|---|
-| `p0` | Glandular differentiation. Rings of cells around an open central hole (a lumen), lined by tall cells; pale blue-grey mucin pools between or inside the cells; clear vacuoles that push nuclei aside; dense pink scar-like tissue between the structures. Even when most of the field is solid sheets, choose this description when well-formed gland rings with open lumens are clearly present in at least two separate places. Mucin pools alone, or spaces that merely look gland-like, are not enough. Judge the differentiation, not the largest area. | glandular / mucinous |
+| `p0` | Glandular growth. Rounded or irregular rings of cells around an open central hole (a lumen), lined by tall cells; pale blue-grey mucin pools between or inside the structures; dense pink scar-like tissue separates the structures. | glandular / mucinous |
 | `p1` | Air-sac architecture. Several open, mostly empty spaces separated by very thin walls one or two cells thick; little crowded cell growth; scattered dark pigment specks, red blood cells and pale bubbly scavenger cells inside the spaces. | alveolar |
-| `p2` | Keratinizing solid differentiation. Broad islands or sheets of polygonal cells with abundant dense opaque pink cytoplasm and sharply drawn cell borders, and at least one keratinizing tie-breaker: concentric onion-skin whorls of bright pink keratin, fine spine-like bridges between neighbouring cells, or intensely pink shrunken cells. Solid sheets without a keratinizing tie-breaker do not fit this description. | solid cohesive / keratinizing |
-
-These descriptions are the outcome of the tuning experiment in
-[`reports/tuning.md`](../reports/tuning.md): they define *differentiation* and
-name their tie-breakers explicitly, instead of describing the dominant texture.
-`a_whorl` and `a_spines` additionally use strict outcome criteria (≥2 clear
-examples before answering true), because fine bridges and whorls are the two
-most hallucination-prone observations and they decide the glandular/keratinizing
-boundary.
+| `p2` | Solid cohesive growth. Broad islands or sheets of polygonal cells with abundant dense opaque pink cytoplasm and sharply drawn cell borders; concentric onion-skin whorls of bright pink material; dead pink debris in the centre of the islands. | solid cohesive |
 
 The architecture Choice is asked twice: once in the order above, once reordered
-and framed as "judge the differentiation, not the staining". The two probability
+and framed as "judge the architecture, not the staining". The two probability
 vectors are averaged, which reduces option-order bias.
 
 ## Observation table

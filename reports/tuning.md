@@ -134,10 +134,9 @@ Panels: `A-10` = tuning panel (seed 20261021), `B-10` = holdout (20261022),
 | 47 | v26_mucin_concession | B-10 | 0.90 | 1.000 | 1.00 | 1.00 | 0.67 | the concession reopens the squamous leak |
 | 48 | v26_mucin_concession | holdout-99 | 0.90 | 1.000 | 0.88 | 1.00 | 0.82 | rejected: 5 squamous tiles flip |
 
-## The winner
+## The winner (and its rejection at scale)
 
-`v21_precise_strict`, now shipped as `jev_cancer/protocol.py`
-(`PROTOCOL_VERSION = "2026-10-21.tuned"`):
+`v21_precise_strict` won the panel experiment:
 
 1. **Profile descriptions judge differentiation, not dominant texture.** `p0`
    claims a solid field when well-formed gland rings with lumens are clearly
@@ -147,9 +146,34 @@ Panels: `A-10` = tuning panel (seed 20261021), `B-10` = holdout (20261022),
 2. **Strict ≥2-example outcome criteria** on `a_whorl` and `a_spines`, the two
    hallucination-prone tie-breaker observations.
 
-Validated at **0.91 overall (adeno 0.85 / benign 1.00 / squamous 0.88)** vs the
-baseline bank's 0.89 (0.82 / 1.00 / 0.85) on 99 held-out images, with binary
-accuracy 1.000 for both.
+It scored 0.91 vs the baseline bank's 0.89 on the 99-image validation panel —
+a 2-image difference, explicitly flagged below as "a direction, not an effect
+size".
+
+### Post-hoc scale test (the decisive one)
+
+Both banks were then run over the **same first 2,000 images of the index**
+(`scripts/01_run.py --count 2000`), graded with the same grader:
+
+| Bank | Overall | Adeno | Benign | Squamous |
+|---|---:|---:|---:|---:|
+| pre-tuning (`804c139028d5a355`) | **0.9125** | 0.830 | 0.998 | 0.914 |
+| v21 tuned (`d5ff8dc8c896bf8b`) | 0.8965 | 0.852 | 0.998 | 0.845 |
+| delta | **−1.6pp** | +2.2pp | 0 | **−6.9pp** |
+
+83 profiles changed: 25 old errors fixed, 57 newly broken (exact paired sign
+test p ≈ 0.0005). The regression is real, not noise.
+
+**Verdict: v21 was rejected and the shipped bank is the pre-tuning one.** The
+mechanism: v21's "p2 requires a keratinizing tie-breaker" plus the strict
+≥2-example criteria suppress keratin evidence, trading +2.2pp adeno for −6.9pp
+squamous. The panel loop selected for exactly the two tiles it was designed
+against and paid for it everywhere else. Lesson recorded in the README: wording
+changes at this boundary move both classes at once and must be selected on
+thousands of images, not panels.
+
+Metrics files: `reports/run_head2000_pretuning.json` (0.9125) and
+`reports/run_head2000_v21.json` (0.8965).
 
 ## Caveats
 

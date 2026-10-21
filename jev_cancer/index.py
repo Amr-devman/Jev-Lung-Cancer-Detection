@@ -114,6 +114,8 @@ def select_subset(
 
 
 def subset_key(subset: dict) -> str:
+    if isinstance(subset["seed"], str):
+        return subset["seed"]
     return f"f{subset['fraction']:g}_s{subset['seed']}"
 
 

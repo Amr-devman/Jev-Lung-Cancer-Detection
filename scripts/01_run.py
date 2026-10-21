@@ -43,6 +43,12 @@ def main() -> int:
         default=config.DEFAULT_SEED,
         help=f"seed for the stratified draw (default {config.DEFAULT_SEED})",
     )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=None,
+        help="evaluate the first N images of the index instead of a stratified draw",
+    )
     parser.add_argument("--workers", type=int, default=config.DEFAULT_WORKERS)
     parser.add_argument("--source", type=Path, default=None, help="local dataset copy")
     parser.add_argument("--rebuild-index", action="store_true")
@@ -54,7 +60,24 @@ def main() -> int:
     args = parser.parse_args()
 
     index = build_index(args.source, force=args.rebuild_index)
-    subset = select_subset(index, fraction=args.fraction, seed=args.seed)
+    if args.count:
+        if args.fraction is not None:
+            raise SystemExit("--count and --fraction are mutually exclusive")
+        images = index["images"][: args.count]
+        subset = {
+            "fraction": args.count / index["total"],
+            "seed": f"head{args.count}",
+            "per_class": None,
+            "class_counts": {
+                name: sum(1 for item in images if item["class"] == name)
+                for name in sorted(config.SOURCE_CLASSES)
+            },
+            "total": len(images),
+            "images": images,
+        }
+        print(f"[subset] first {len(images)} images of the index, {subset['class_counts']}")
+    else:
+        subset = select_subset(index, fraction=args.fraction, seed=args.seed)
 
     if args.export_only:
         directory = run_dir(subset)
