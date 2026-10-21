@@ -23,23 +23,25 @@ MAX_SIDE = 1568
 DANGER_ZONE_HEADERS = {"TypeSafe-Danger-Zone-Images": "true"}
 USD_PER_BTOK = 42.0
 
-# The default subset fraction nets 3,000 images out of the 15,000-image
-# dataset: 1,000 per class. ``scripts/01_run.py --fraction`` overrides it and
-# ``--seed`` makes the random draw reproducible.
-DEFAULT_FRACTION = 0.2
+# The evaluation subset. LungHist700 is small (691 images), so the default is
+# the whole dataset. ``scripts/01_run.py --fraction`` draws a stratified subset
+# instead and ``--seed`` makes the draw reproducible.
+DATASET_TAG = "lh700"
+DEFAULT_FRACTION = 1.0
 DEFAULT_SEED = 20261020
 DEFAULT_WORKERS = 12
 
 # Internal, neutral identifiers. The profile-to-class mapping is used only by
-# the grader; no prompt ever contains a class name.
+# the grader; no prompt ever contains a class name. Sorted source-folder order
+# maps to c0/c1/c2: aca -> c0, nor -> c1, ssc -> c2.
 CLASS_IDS = ("c0", "c1", "c2")
 PROFILE_IDS = ("p0", "p1", "p2")
 PROFILE_TO_CLASS = {"p0": "c0", "p1": "c1", "p2": "c2"}
 
-SOURCE_CLASSES = ("adenocarcinoma", "benign", "squamous_cell_carcinoma")
+SOURCE_CLASSES = ("aca", "nor", "ssc")
 
 # Terms that must never reach a prompt. They either name a diagnosis or encode
-# dataset provenance.
+# dataset provenance (folder names, dataset name, metadata columns).
 BANNED_PROMPT_TERMS = (
     "adenocarcinoma",
     "adeno",
@@ -53,10 +55,15 @@ BANNED_PROMPT_TERMS = (
     "neoplasm",
     "metastasis",
     "scc",
+    "ssc",
+    "aca",
+    "nor",
     "luad",
     "lusc",
+    "lunghist",
     "lc25000",
     "kaggle",
     "rm1000",
     "histopathological",
+    "patient",
 )

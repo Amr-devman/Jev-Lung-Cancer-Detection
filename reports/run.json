@@ -1,190 +1,190 @@
 {
-  "total": 3000,
-  "correct": 2739,
-  "accuracy": 0.913,
+  "total": 691,
+  "correct": 485,
+  "accuracy": 0.7018813314037626,
   "accuracy_ci95": [
-    0.9023790989244083,
-    0.9225645332564631
+    0.6667342911744524,
+    0.7347960720047239
   ],
-  "balanced_accuracy": 0.9129999999999999,
+  "balanced_accuracy": 0.695485529922616,
   "per_class": {
     "c0": {
-      "support": 1000,
-      "precision": 0.9091915836101883,
-      "recall": 0.821,
-      "f1": 0.862848134524435
+      "support": 280,
+      "precision": 0.6153846153846154,
+      "recall": 0.7714285714285715,
+      "f1": 0.6846275752773376
     },
     "c1": {
-      "support": 1000,
-      "precision": 0.9871541501976284,
-      "recall": 0.999,
-      "f1": 0.993041749502982
+      "support": 151,
+      "precision": 0.9711538461538461,
+      "recall": 0.6688741721854304,
+      "f1": 0.792156862745098
     },
     "c2": {
-      "support": 1000,
-      "precision": 0.8470046082949308,
-      "recall": 0.919,
-      "f1": 0.8815347721822542
+      "support": 260,
+      "precision": 0.711864406779661,
+      "recall": 0.6461538461538462,
+      "f1": 0.6774193548387097
     }
   },
   "matrix": [
     [
-      821,
-      13,
-      166
+      216,
+      3,
+      61
     ],
     [
-      1,
-      999,
-      0
+      43,
+      101,
+      7
     ],
     [
-      81,
+      92,
       0,
-      919
+      168
     ]
   ],
   "class_names": {
-    "c0": "adenocarcinoma",
-    "c1": "benign",
-    "c2": "squamous_cell_carcinoma"
+    "c0": "aca",
+    "c1": "nor",
+    "c2": "ssc"
   },
   "confusion_named": {
-    "adenocarcinoma": {
-      "adenocarcinoma": 821,
-      "benign": 13,
-      "squamous_cell_carcinoma": 166
+    "aca": {
+      "aca": 216,
+      "nor": 3,
+      "ssc": 61
     },
-    "benign": {
-      "adenocarcinoma": 1,
-      "benign": 999,
-      "squamous_cell_carcinoma": 0
+    "nor": {
+      "aca": 43,
+      "nor": 101,
+      "ssc": 7
     },
-    "squamous_cell_carcinoma": {
-      "adenocarcinoma": 81,
-      "benign": 0,
-      "squamous_cell_carcinoma": 919
+    "ssc": {
+      "aca": 92,
+      "nor": 0,
+      "ssc": 168
     }
   },
   "per_class_named": {
-    "adenocarcinoma": {
-      "support": 1000,
-      "precision": 0.9091915836101883,
-      "recall": 0.821,
-      "f1": 0.862848134524435
+    "aca": {
+      "support": 280,
+      "precision": 0.6153846153846154,
+      "recall": 0.7714285714285715,
+      "f1": 0.6846275752773376
     },
-    "benign": {
-      "support": 1000,
-      "precision": 0.9871541501976284,
-      "recall": 0.999,
-      "f1": 0.993041749502982
+    "nor": {
+      "support": 151,
+      "precision": 0.9711538461538461,
+      "recall": 0.6688741721854304,
+      "f1": 0.792156862745098
     },
-    "squamous_cell_carcinoma": {
-      "support": 1000,
-      "precision": 0.8470046082949308,
-      "recall": 0.919,
-      "f1": 0.8815347721822542
+    "ssc": {
+      "support": 260,
+      "precision": 0.711864406779661,
+      "recall": 0.6461538461538462,
+      "f1": 0.6774193548387097
     }
   },
   "accuracy_ci95_bootstrap": [
-    0.9026666666666666,
-    0.9233333333333333
+    0.6671490593342981,
+    0.7351664254703328
   ],
-  "binary_benign_vs_carcinoma": {
-    "accuracy": 0.9953333333333333,
-    "total": 3000
+  "binary_normal_vs_carcinoma": {
+    "accuracy": 0.9232995658465991,
+    "total": 691
   },
   "confidence_curve": [
     {
       "threshold": 0.0,
       "coverage": 1.0,
-      "accuracy": 0.913,
-      "count": 3000
+      "accuracy": 0.7018813314037626,
+      "count": 691
     },
     {
       "threshold": 0.4,
-      "coverage": 0.996,
-      "accuracy": 0.9149933065595717,
-      "count": 2988
+      "coverage": 0.9927641099855282,
+      "accuracy": 0.7055393586005831,
+      "count": 686
     },
     {
       "threshold": 0.5,
-      "coverage": 0.9546666666666667,
-      "accuracy": 0.9277234636871509,
-      "count": 2864
+      "coverage": 0.9406657018813314,
+      "accuracy": 0.7153846153846154,
+      "count": 650
     },
     {
       "threshold": 0.6,
-      "coverage": 0.8753333333333333,
-      "accuracy": 0.9497334348819497,
-      "count": 2626
+      "coverage": 0.7568740955137482,
+      "accuracy": 0.7609942638623327,
+      "count": 523
     },
     {
       "threshold": 0.7,
-      "coverage": 0.76,
-      "accuracy": 0.9666666666666667,
-      "count": 2280
+      "coverage": 0.5716353111432706,
+      "accuracy": 0.8075949367088607,
+      "count": 395
     },
     {
       "threshold": 0.8,
-      "coverage": 0.30633333333333335,
-      "accuracy": 0.9640914036996736,
-      "count": 919
+      "coverage": 0.3314037626628075,
+      "accuracy": 0.8384279475982532,
+      "count": 229
     },
     {
       "threshold": 0.9,
-      "coverage": 0.02266666666666667,
-      "accuracy": 1.0,
-      "count": 68
+      "coverage": 0.06367583212735166,
+      "accuracy": 0.9545454545454546,
+      "count": 44
     }
   ],
   "per_class_accuracy": {
-    "adenocarcinoma": {
-      "n": 1000,
-      "accuracy": 0.821
+    "aca": {
+      "n": 280,
+      "accuracy": 0.7714285714285715
     },
-    "benign": {
-      "n": 1000,
-      "accuracy": 0.999
+    "nor": {
+      "n": 151,
+      "accuracy": 0.6688741721854304
     },
-    "squamous_cell_carcinoma": {
-      "n": 1000,
-      "accuracy": 0.919
+    "ssc": {
+      "n": 260,
+      "accuracy": 0.6461538461538462
     }
   },
   "subset": {
-    "fraction": 0.2,
+    "fraction": 1.0,
     "seed": 20261020,
-    "per_class": 1000,
+    "per_class": null,
     "class_counts": {
-      "adenocarcinoma": 1000,
-      "benign": 1000,
-      "squamous_cell_carcinoma": 1000
+      "aca": 280,
+      "nor": 151,
+      "ssc": 260
     },
-    "total": 3000
+    "total": 691
   },
   "run": {
-    "requested": 3000,
-    "pending_at_start": 2994,
+    "requested": 691,
+    "pending_at_start": 691,
     "errors": 0,
-    "requests": 2994,
-    "input_tokens": 22243202,
-    "cost_usd": 0.934214484,
-    "wall_seconds": 66.8,
+    "requests": 691,
+    "input_tokens": 7300510,
+    "cost_usd": 0.30662142,
+    "wall_seconds": 42.0,
     "model": "jev-1.14.0",
     "protocol": "804c139028d5a355",
     "subset": {
-      "fraction": 0.2,
+      "fraction": 1.0,
       "seed": 20261020,
-      "per_class": 1000,
+      "per_class": null,
       "class_counts": {
-        "adenocarcinoma": 1000,
-        "benign": 1000,
-        "squamous_cell_carcinoma": 1000
+        "aca": 280,
+        "nor": 151,
+        "ssc": 260
       },
-      "total": 3000
+      "total": 691
     },
-    "predicted": 3000
+    "predicted": 691
   },
-  "predictions_path": "runs/804c139028d5a355/f0.2_s20261020/predictions.json"
+  "predictions_path": "/home/amr-devman/lab/jev-cancer/runs/lh700/804c139028d5a355/f1_s20261020/predictions.json"
 }

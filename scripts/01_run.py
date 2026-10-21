@@ -2,9 +2,9 @@
 """Classify a stratified subset of the dataset with one Jev request per image.
 
 The subset is drawn at random, stratified so every class contributes the same
-number of images. ``--fraction`` is the share of the whole dataset to evaluate
-(default 0.2, which nets 3,000 of the 15,000 images: 1,000 per class) and
-``--seed`` makes the draw reproducible across machines.
+number of images. By default the whole dataset is evaluated; ``--fraction``
+draws a stratified subset instead (e.g. 0.2 = 20% of the images, equally split
+across classes) and ``--seed`` makes the draw reproducible across machines.
 
 The model sees only pixels and the clinical question bank. Class folders are
 used to build the subset and, in ``02_grade.py``, to grade it. Grading is a
@@ -35,7 +35,7 @@ def main() -> int:
         "--fraction",
         type=float,
         default=None,
-        help="fraction of the dataset to evaluate (default 0.2 = 3,000 images)",
+        help="fraction of the dataset to evaluate (default: all images)",
     )
     parser.add_argument(
         "--seed",

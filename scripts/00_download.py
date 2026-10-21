@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Download the dataset with kagglehub and verify its layout.
 
-The Kaggle mirror ``rm1000/lung-cancer-histopathological-images`` is a
-15,000-image subset of LC25000: three class folders of 5,000 JPEG tiles each.
-The pixels stay in the kagglehub cache; nothing is copied or committed.
+The dataset is **LungHist700** (``abdullahhasansajjad/lunghist700``): 691 JPEG
+tiles of lung tissue in three class folders under
+``LungHist700_combined/data/images`` — ``aca`` (280), ``nor`` (151), ``ssc``
+(260) — plus a ``data.csv`` with subclass, magnification and patient metadata,
+which the pipeline never reads. The pixels stay in the kagglehub cache; nothing
+is copied or committed.
 """
 
 from __future__ import annotations

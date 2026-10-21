@@ -6,20 +6,22 @@ separate the entities, and which findings are unreliable on a small biopsy. It i
 written for people building the experiment, not for diagnosis. Nothing here is
 medical advice.
 
-The dataset in this repository is the four-class *Lung Cancer Histopathological
-Images* Kaggle mirror (`rm1000/lung-cancer-histopathological-images`), a
-15,000-image subset of the public **LC25000** collection. The mirror actually
-ships **three** classes, not four:
+The dataset in this repository is **LungHist700**
+(`abdullahhasansajjad/lunghist700` on Kaggle), 691 H&E fields of lung tissue in
+three class folders under `LungHist700_combined/data/images`:
 
 | Folder in the download | Images | Entity |
 |---|---:|---|
-| `adenocarcinoma` | 5,000 | lung adenocarcinoma |
-| `squamous_cell_carcinoma` | 5,000 | lung squamous cell carcinoma |
-| `benign` | 5,000 | benign lung tissue |
+| `aca` | 280 | lung adenocarcinoma |
+| `nor` | 151 | normal lung tissue |
+| `ssc` | 260 | lung squamous cell carcinoma |
 
-There is no large-cell carcinoma folder in this mirror. All images are
-768 × 768 px, RGB, JPEG. They are image tiles, not whole slides: there is no
-patient history, no stain metadata, no IHC, and no slide-level context.
+The download also ships a `data.csv` with per-image subclass (differentiation
+grade), magnification (20×/40×) and patient id. The pipeline never reads it —
+grading is on the three superclass folders only. All images are 1600 × 1200 px,
+RGB, JPEG. They are image fields, not whole slides: there is no slide-level
+architecture, no stain metadata, no IHC, and no patient context beyond what the
+unused CSV holds.
 
 ## 1. Why the H&E image matters, and what it cannot show
 
@@ -42,9 +44,9 @@ The classifier in this repo therefore uses **morphology only**. That is a real
 constraint, not a shortcut: it is the same information a pathologist has before
 ordering stains, and it is exactly the situation where a triage model is useful.
 
-A second constraint is scale. A 768 px tile at 20× covers a small field. Features
-such as "invasion of the pleura" or "spread through air spaces" cannot be judged
-from one tile. The model is asked only about properties that are visible in the
+A second constraint is scale. A 20×/40× field covers a small area. Features such
+as "invasion of the pleura" or "spread through air spaces" cannot be judged from
+one field. The model is asked only about properties that are visible in the
 field.
 
 ## 2. Lung adenocarcinoma
@@ -138,7 +140,7 @@ Napsin A are negative. There is no routine targeted therapy comparable to the
 adenocarcinoma drivers; immunotherapy (PD-L1) is central. FGFR1 amplification,
 SOX2 amplification and PIK3CA mutations are common.
 
-## 4. Benign lung tissue
+## 4. Normal / benign lung tissue
 
 ### Normal histology
 
@@ -161,7 +163,7 @@ A small biopsy can show reactive changes that look alarming:
 | Alveolar haemorrhage | Blood fills spaces, macrophages | Clinical context, no tumour cells |
 | Anthracosis / inflammation | Dense pigment and lymphocytes | Pigment is extracellular/within macrophages; no epithelial atypia |
 
-This is why the benign class is not simply "empty tissue": the questions have to
+This is why the normal class is not simply "empty tissue": the questions have to
 distinguish **orderly architecture** from **crowded, atypical, infiltrative
 growth**, not just "cells present vs absent".
 
@@ -179,7 +181,7 @@ with solid adenocarcinoma and poorly differentiated squamous carcinoma.
 The discriminators below are the ones a pathologist would use on a single H&E
 tile, ranked by how reliably they appear in this image collection.
 
-| Observation | Adenocarcinoma | Squamous cell carcinoma | Benign lung |
+| Observation | Adenocarcinoma | Squamous cell carcinoma | Normal lung |
 |---|---|---|---|
 | Open alveolar air spaces | Rare (except lepidic) | Rare | **Characteristic** |
 | Thin alveolar septa | Rare | Rare | **Characteristic** |
@@ -227,26 +229,27 @@ Four rules shaped `protocol.py`:
    the same words a pathologist would use to teach a student. Vocabulary the
    model cannot ground visually is a coin flip; the description turns each term
    into a visual task.
-4. **Ask about what a 768 px tile can show.** Architecture, cytoplasm, nuclei,
-   stroma and background — not invasion, metastasis, or molecular status.
+4. **Ask about what a single field of view can show.** Architecture, cytoplasm,
+   nuclei, stroma and background — not invasion, metastasis, or molecular
+   status.
 
 The full bank is documented in [`question_bank.md`](question_bank.md).
 
 ## 8. Limitations
 
-- LC25000 is derived from a small number of slides and contains near-duplicate
-  tiles. The evaluation subset is a random stratified draw, so a near-duplicate
-  of one evaluated tile can sit outside it; the dataset is not a patient-level
-  or slide-level benchmark, and image-level confidence intervals overstate
+- LungHist700 is small (691 images) and not patient-independent: `data.csv`
+  shows the same tissue field at both 20× and 40× under one image id, and
+  images are grouped by patient. Image-level confidence intervals overstate
   independence.
 - The dataset labels are the source dataset's labels. They are not re-reviewed
-  by a pathologist for this experiment.
-- The "benign" class is benign lung tissue, not a set of benign mimics. A model
-  that learns "alveolar architecture = benign" will not necessarily recognise
+  by a pathologist for this experiment, and the differentiation-grade subclass
+  labels in `data.csv` are unused.
+- The normal class is normal lung tissue, not a set of benign mimics. A model
+  that learns "alveolar architecture = normal" will not necessarily recognise
   reactive atypia in a real biopsy.
 - H&E appearance varies with scanner, stain batch and fixation. A model tuned on
   one collection may not transfer.
-- A 768 px tile has no slide-level context. Any clinical claim would need
+- A 20×/40× field has no slide-level context. Any clinical claim would need
   validation on whole slides, multiple institutions, and a pathologist read.
 
 ## References
@@ -261,7 +264,5 @@ The full bank is documented in [`question_bank.md`](question_bank.md).
 - PathologyOutlines: lung adenocarcinoma, squamous cell carcinoma.
 - Patel S et al. Evaluation of TTF-1, Napsin A, p40 and p63 in subtyping NSCLC.
   PMC12308192 (2025).
-- Borkowski AA et al. Lung and Colon Cancer Histopathological Image Dataset
-  (LC25000). arXiv:1912.12142 (2019).
 - NCCN Guidelines: Non-Small Cell Lung Cancer (current version at time of
   writing).

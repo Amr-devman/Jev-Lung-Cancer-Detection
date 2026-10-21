@@ -19,8 +19,8 @@ dataset folder, or a filename.
 3. **Descriptive, not diagnostic.** "A whorl of concentric pink material", not
    "a keratin pearl". "Open air spaces with thin walls", not "normal lung". The
    mapping from observation to entity lives in code, where it can be audited.
-4. **Visible in a 768 px tile.** No questions about invasion, metastasis,
-   pleural spread, or molecular status.
+4. **Visible in a single field of view.** No questions about invasion,
+   metastasis, pleural spread, or molecular status.
 5. **Balanced polarity.** Every question is phrased so that "yes" means the
    property is present. Each Noul carries shared outcome criteria: `true` = the
    property is clearly visible, `false` = absent, too faint, or a doubtful hint.

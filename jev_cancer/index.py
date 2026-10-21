@@ -1,7 +1,13 @@
 """Download the dataset and build one neutral index over it.
 
+The dataset is LungHist700 (``abdullahhasansajjad/lunghist700`` on Kaggle):
+691 JPEG tiles in three class folders under ``LungHist700_combined/data/images``
+(``aca``, ``nor``, ``ssc``), plus a ``data.csv`` with subclass, magnification
+and patient ids. Only the class folders are read — the CSV metadata is never
+used and never sent anywhere.
+
 There is no prepared copy of the pixels. Every image is fed to the model under a
-neutral id like ``img_004271`` with no label. The class folder is kept in the
+neutral id like ``img_000427`` with no label. The class folder is kept in the
 index only so the stratified subset can be drawn and, after predictions are
 frozen, so the grader can reconstruct the truth.
 """
@@ -20,16 +26,24 @@ IMAGE_SUFFIXES = (".jpg", ".jpeg", ".png")
 
 INDEX_JSON = config.RUNS / "index.json"
 
+DATASET_SLUG = "abdullahhasansajjad/lunghist700"
+
 
 def download_dataset() -> Path:
-    """Download the Kaggle mirror via kagglehub and return its root folder."""
+    """Download the Kaggle dataset via kagglehub and return its root folder."""
     import kagglehub
 
-    return Path(kagglehub.dataset_download("rm1000/lung-cancer-histopathological-images"))
+    return Path(kagglehub.dataset_download(DATASET_SLUG))
 
 
 def class_root(source: Path) -> Path:
-    for candidate in (source, source / "versions" / "1"):
+    """Find the directory that holds the class folders.
+
+    Kagglehub layouts vary by version, so search a few levels down for a
+    directory containing every class folder rather than hard-coding a path.
+    """
+    candidates = [source, *sorted(p for p in source.rglob("*") if p.is_dir())]
+    for candidate in candidates:
         if all((candidate / name).is_dir() for name in config.SOURCE_CLASSES):
             return candidate
     raise SystemExit(f"could not find {config.SOURCE_CLASSES} under {source}")
@@ -72,9 +86,11 @@ def select_subset(
 
     Every class contributes the same number of images, so the subset is class
     balanced. ``fraction`` is the share of the whole dataset to evaluate; left
-    as ``None`` it nets the default 3,000 images (1,000 per class).
+    as ``None`` it uses the default (the whole dataset), and ``1.0`` evaluates
+    every image regardless of class balance.
     """
-    if not 0 < (fraction if fraction is not None else config.DEFAULT_FRACTION) <= 1:
+    fraction = config.DEFAULT_FRACTION if fraction is None else fraction
+    if not 0 < fraction <= 1:
         raise SystemExit(f"fraction must be in (0, 1], got {fraction}")
 
     by_class: dict[str, list[dict]] = {}
@@ -84,7 +100,19 @@ def select_subset(
         items.sort(key=lambda item: item["id"])
 
     total = len(index["images"])
-    fraction = config.DEFAULT_FRACTION if fraction is None else fraction
+    if fraction == 1.0:
+        picked = sorted(index["images"], key=lambda item: item["id"])
+        counts = {name: len(items) for name, items in sorted(by_class.items())}
+        print(f"[subset] all {len(picked)} images, seed ignored for full-dataset runs")
+        return {
+            "fraction": 1.0,
+            "seed": seed,
+            "per_class": None,
+            "class_counts": counts,
+            "total": len(picked),
+            "images": picked,
+        }
+
     per_class = min(
         round(fraction * total / len(by_class)),
         min(len(items) for items in by_class.values()),

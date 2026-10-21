@@ -24,7 +24,7 @@ from jev_cancer.metrics import bootstrap_accuracy, summarize
 
 
 def find_latest_run() -> Path:
-    candidates = sorted(config.RUNS.glob("*/*/predictions.json"))
+    candidates = sorted(config.RUNS.glob("*/*/*/predictions.json"))
     if not candidates:
         raise SystemExit("no runs found; run scripts/01_run.py first")
     return candidates[-1].parent
@@ -64,10 +64,10 @@ def main() -> int:
     }
     summary["accuracy_ci95_bootstrap"] = bootstrap_accuracy(pred, truth)
 
-    benign_class = next(class_id for class_id, name in class_names.items() if name == "benign")
-    binary_pred = ["benign" if label == benign_class else "carcinoma" for label in pred]
-    binary_true = ["benign" if label == benign_class else "carcinoma" for label in truth]
-    summary["binary_benign_vs_carcinoma"] = {
+    normal_class = config.PROFILE_TO_CLASS["p1"]  # the air-sac profile maps to the normal class
+    binary_pred = ["normal" if label == normal_class else "carcinoma" for label in pred]
+    binary_true = ["normal" if label == normal_class else "carcinoma" for label in truth]
+    summary["binary_normal_vs_carcinoma"] = {
         "accuracy": float(np.mean([p == t for p, t in zip(binary_pred, binary_true, strict=True)])),
         "total": len(pred),
     }
@@ -114,7 +114,7 @@ def main() -> int:
         f"(95% CI {summary['accuracy_ci95'][0]:.4f}-{summary['accuracy_ci95'][1]:.4f})"
     )
     print(f"  balanced    {summary['balanced_accuracy']:.4f}")
-    print(f"  benign/ca   {summary['binary_benign_vs_carcinoma']['accuracy']:.4f}")
+    print(f"  normal/ca   {summary['binary_normal_vs_carcinoma']['accuracy']:.4f}")
     print("  per class:")
     for name, values in summary["per_class_named"].items():
         print(

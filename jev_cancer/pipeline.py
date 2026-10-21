@@ -26,7 +26,7 @@ from .protocol import PROFILE_IDS, assert_no_leaks, build_questions, question_si
 
 
 def protocol_dir() -> Path:
-    return config.RUNS / question_signature()
+    return config.RUNS / config.DATASET_TAG / question_signature()
 
 
 def run_dir(subset: dict) -> Path:
