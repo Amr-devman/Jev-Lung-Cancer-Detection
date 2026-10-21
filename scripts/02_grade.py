@@ -24,7 +24,10 @@ from jev_cancer.metrics import bootstrap_accuracy, summarize
 
 
 def find_latest_run() -> Path:
-    candidates = sorted(config.RUNS.glob("*/*/*/predictions.json"))
+    candidates = sorted(
+        config.RUNS.glob("*/*/*/predictions.json"),
+        key=lambda path: path.stat().st_mtime,
+    )
     if not candidates:
         raise SystemExit("no runs found; run scripts/01_run.py first")
     return candidates[-1].parent

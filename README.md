@@ -14,63 +14,64 @@ This repository is an experiment, not a medical device. See
 ## Results
 
 Default run: the **whole dataset** — all 691 LungHist700 images — model
-`jev-1.14.0`, one request per image. Graded once, after all predictions were
-frozen. Full metrics in [`reports/run.json`](reports/run.json).
+`jev-1.14.0`, one request per image (two views each). Graded once, after all
+predictions were frozen. Full metrics in [`reports/run.json`](reports/run.json).
 
 | Metric | Value |
 |---|---:|
 | Images evaluated | 691 (all) |
-| Accuracy | **70.2%** (95% CI 66.7–73.5, Wilson) |
-| Balanced accuracy | 69.6% |
-| Bootstrap 95% CI (2,000 resamples) | 66.7–73.5 |
-| Normal vs carcinoma (binary) | 92.3% |
+| Accuracy | **69.8%** (95% CI 66.2–73.1, Wilson) |
+| Balanced accuracy | 69.8% |
+| Bootstrap 95% CI (2,000 resamples) | 66.4–73.2 |
+| Normal vs carcinoma (binary) | 92.5% |
 
 Per class:
 
 | Class | n | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|
-| adenocarcinoma (`aca`) | 280 | 0.615 | 0.771 | 0.685 |
-| normal lung (`nor`) | 151 | 0.971 | 0.669 | 0.792 |
-| squamous cell carcinoma (`ssc`) | 260 | 0.712 | 0.646 | 0.677 |
+| adenocarcinoma (`aca`) | 280 | 0.610 | 0.754 | 0.674 |
+| normal lung (`nor`) | 151 | 0.930 | 0.709 | 0.805 |
+| squamous cell carcinoma (`ssc`) | 260 | 0.713 | 0.631 | 0.669 |
 
 Confusion matrix (rows = truth, columns = predicted):
 
 | | aca | nor | ssc |
 |---|---:|---:|---:|
-| **aca** | 216 | 3 | 61 |
-| **nor** | 43 | 101 | 7 |
-| **ssc** | 92 | 0 | 168 |
+| **aca** | 211 | 8 | 61 |
+| **nor** | 39 | 107 | 5 |
+| **ssc** | 96 | 0 | 164 |
 
 Confidence / coverage curve — the fused probability is an abstention knob, not
 a formality:
 
 | Min confidence | Coverage | Accuracy on covered |
 |---|---:|---:|
-| ≥ 0.5 | 94% | 71.5% |
-| ≥ 0.6 | 76% | 76.1% |
-| ≥ 0.7 | 57% | 80.8% |
-| ≥ 0.8 | 33% | 83.8% |
-| ≥ 0.9 | 6% | 95.5% |
+| ≥ 0.5 | 92% | 72.4% |
+| ≥ 0.6 | 76% | 77.2% |
+| ≥ 0.7 | 58% | 83.0% |
+| ≥ 0.8 | 31% | 89.1% |
+| ≥ 0.9 | 7% | 95.7% |
 
 ### Reading the numbers
 
 This dataset is much harder than the LC25000-style benchmarks where classical
-models reach the high 90s — 70% here is a real signal, not a disappointment.
+models reach the high 90s — ~70% here is a real signal, not a disappointment.
 
-- **The dominant error is still the glandular ↔ keratinizing boundary.** 153 of
-  the 206 errors are `aca ↔ ssc` (61 + 92). That is the known hard case of
+- **The dominant error is the glandular ↔ keratinizing boundary.** 157 of the
+  209 errors are `aca ↔ ssc` (61 + 96). That is the known hard case of
   H&E-only pathology: a solid-pattern glandular tumour and a poorly
   differentiated squamous tumour can both be sheets of atypical cells, and in
-  practice the tie is broken with p40 / TTF-1 stains. The model has no stains.
-- **Normal lung is over-called as glandular growth** (43 of 151 normal tiles →
-  `aca`, recall 0.669) while being almost never confused with squamous (7).
-  Cellular normal fields — bronchial walls, macrophage-filled spaces, reactive
-  epithelium — read as crowded glandular growth. The reverse failure is rare:
-  when the model predicts `nor` it is right 97% of the time.
-- **Confidence is informative.** At the 0.7 threshold the model covers 57% of
-  the set at 80.8% accuracy; at 0.9 it is 95.5% accurate on the 6% it is
-  certain about. A triage workflow could forward only the uncertain fraction to
-  a human.
+  practice the tie is broken with p40 / TTF-1 stains. The model has no stains,
+  and neither two-zoom input nor contrastive tie-breaker questions cracked it.
+- **Normal tissue is over-called as carcinoma** (44 of 151 fields), but when
+  the model predicts `nor` it is right 93% of the time. The growth-arrangement
+  question (organized within pre-existing structures vs infiltrative/expansile
+  growth) is the cleanest single signal here: 131 of 151 normal fields answer
+  "pre-existing structures".
+- **Confidence is informative and well calibrated at the top.** At the 0.8
+  threshold the model covers 31% of the set at 89.1% accuracy; at 0.9 it is
+  95.7% accurate on the 7% it is certain about. A triage workflow could forward
+  only the uncertain fraction to a human.
 
 ## The experiment
 
@@ -84,7 +85,7 @@ models reach the high 90s — 70% here is a real signal, not a disappointment.
 | Training | none |
 | Labels seen by the model | none |
 | IHC / molecular input | none |
-| Questions per image | 42 yes/no observations + 6 multiple-choice |
+| Questions per image | 45 yes/no observations + 8 multiple-choice |
 
 The three classes are lung adenocarcinoma (`aca`), normal lung tissue (`nor`),
 and lung squamous cell carcinoma (`ssc`). The download also ships a `data.csv`
@@ -94,11 +95,18 @@ them to neutral ids `c0`, `c1`, `c2` automatically.
 
 ## Methodology
 
-### One request per image
+### One request per image, two views
 
-For each tile, Jev receives the pixels as `sample` and 48 questions. Nothing
-else is in the state: no reference images, no labels, no filenames, no second
-request. Every question has two parts:
+For each field, Jev receives the pixels twice — `sample` (the whole field) and
+`detail` (the centre of the same field at twice the magnification) — plus 53
+questions. Nothing else is in the state: no reference images, no labels, no
+filenames, no second request. The two views matter because a vision model
+resolves each image on a fixed token grid: the 2× crop is seen at twice the
+effective magnification, which is where keratin whorls, intercellular bridges
+and nuclear detail live. Every question says which view to use. The crop is
+generated in code (`index.load_detail`); no dataset metadata is involved.
+
+Every question has two parts:
 
 1. the **observation**, phrased about morphology only — "does `sample` contain
    rounded or irregular gland-like structures with a central open lumen?";
@@ -133,29 +141,49 @@ architecture descriptions matches the field:
 
 The mapping lives in `config.PROFILE_TO_CLASS` and is used only by the grader.
 
-### From answers to a class
+### From answers to a class: a two-stage decision
 
-Seven signals are computed from the one response and combined by a weighted
-mean with fixed clinical-prior weights (`jev_cancer/fusion.py`):
+The decision is hierarchical, matching how the clinical question is actually
+split (`jev_cancer/fusion.py`):
 
-| Signal | What it is | Weight |
-|---|---|---:|
-| `profile` | probability over the three architecture descriptions | 0.35 |
-| `profile_recheck` | the same Choice, options reordered, "architecture not staining" framing | 0.15 |
-| `proliferation_pattern` | which growth pattern the field shows, soft-mapped to profiles | 0.15 |
-| `rubric` | weighted sum of the 42 present observations, softmaxed | 0.15 |
-| `cell_shape` | dominant epithelial cell shape, soft-mapped | 0.08 |
-| `cytoplasm` | dominant cytoplasm type, soft-mapped | 0.07 |
-| `stroma` | what lies between the epithelial structures, soft-mapped | 0.05 |
+- **Stage 1 — normal tissue vs carcinoma.** Only signals that can judge
+  whether the tissue is untouched or a proliferation vote: the two architecture
+  Choices, the growth-arrangement Choice (organized within pre-existing
+  structures vs infiltrative glands vs expansile solid nests), the stroma
+  Choice and the observation rubric, each projected to a binary
+  normal/carcinoma question.
+- **Stage 2 — glandular vs keratinizing**, asked only once stage 1 says
+  carcinoma. Only signals that can separate the two carcinomas vote: the
+  architecture Choices, the growth-pattern Choice, the contrastive
+  differentiation tie-breaker ("which tie-breakers do you actually see: gland
+  lumens and mucin, or keratin whorls and bridges?"), the cell-shape,
+  cytoplasm and rubric signals, projected to the gland/keratin pair.
+
+The final probabilities are the hierarchical product: `p(normal)` from stage 1,
+and the carcinoma mass split by stage 2. Nothing is fitted; the weights are
+fixed clinical priors (`fusion.WEIGHTS`):
+
+| Signal | What it is | Weight | Votes in |
+|---|---|---:|---|
+| `profile` | probability over the three architecture descriptions | 0.30 | both stages |
+| `differentiation` | forced-choice gland-vs-keratin tie-breaker | 0.12 | stage 2 |
+| `profile_recheck` | the same Choice, options reordered | 0.12 | both stages |
+| `rubric` | weighted sum of the 45 present observations, softmaxed | 0.15 | both stages |
+| `arrangement` | organized/pre-existing vs infiltrative vs expansile growth | 0.10 | stage 1 |
+| `proliferation_pattern` | which growth pattern the field shows | 0.10 | stage 2 |
+| `cell_shape` | dominant epithelial cell shape | 0.06 | stage 2 |
+| `cytoplasm` | dominant cytoplasm type | 0.06 | stage 2 |
+| `stroma` | what lies between the epithelial structures | 0.06 | stage 1 |
 
 The rubric weights are a transparent clinical prior encoded per observation
-(`protocol.FEATURES`): a gland lumen strongly supports `p0`, thin alveolar
-walls strongly support `p1`, an onion-skin whorl strongly supports `p2`, and so
-on. Nothing is fitted; there is no training step anywhere in the repository.
+(`protocol.FEATURES`): a gland lumen strongly supports `p0`, organized
+pre-existing structures and thin alveolar walls strongly support `p1`, an
+onion-skin whorl strongly supports `p2`, and so on. Nothing is fitted; there is
+no training step anywhere in the repository.
 
-The output is a probability vector over `p0/p1/p2`, a confidence and a margin.
-The grader reports a confidence/coverage curve rather than assuming every tile
-is decidable.
+The output is a probability vector over `p0/p1/p2`, both stage probabilities, a
+confidence and a margin. The grader reports a confidence/coverage curve rather
+than assuming every tile is decidable.
 
 ### Zero-leak controls
 
@@ -219,10 +247,11 @@ output directory `runs/lh700/<protocol>/f<fraction>_s<seed>/` never collides.
 
 ## Cost and runtime
 
-The published run sent 7.3M input tokens over 691 images (~10.6k per image:
-one 1600×1200 image plus 48 questions) at TypeSafe's published $42 per billion
-input tokens: **$0.31**. Wall time was **42 seconds** on 16 workers (16 img/s).
-A complete reproduction costs about a third of a dollar and half a minute.
+The published run sent 12.8M input tokens over 691 images (~18.5k per image:
+two views of a 1600×1200 field plus 53 questions) at TypeSafe's published $42
+per billion input tokens: **$0.54**. Wall time was **49 seconds** on 12
+workers (14 img/s). A complete reproduction costs about half a dollar and half
+a minute.
 
 ## Repository layout
 

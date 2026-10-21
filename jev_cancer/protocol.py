@@ -24,7 +24,16 @@ from typing import Any
 
 from .config import BANNED_PROMPT_TERMS, PROFILE_IDS
 
-PROTOCOL_VERSION = "2026-10-21.described"
+PROTOCOL_VERSION = "2026-10-22.staged"
+
+# Every question states which view to use: the whole field and the same centre
+# at twice the magnification. Fine structures (bridges, whorls, nuclear detail)
+# are judged on `detail`; overall architecture on `sample`.
+VIEWS = (
+    "\n\nViews: `sample` is the whole field; `detail` is the centre of the same field at twice "
+    "the magnification. Judge overall architecture on `sample` and fine cellular detail on "
+    "`detail`."
+)
 
 # Outcome descriptions shared by every yes/no observation. They fix the
 # polarity ("yes" = the described property is clearly present) and tell the
@@ -192,6 +201,21 @@ FEATURES: tuple[Feature, ...] = (
     Feature("b_hemosiderin", "Is there golden-brown granular pigment within large cells?",
         "Look for coarse golden-brown granules sitting inside large cells, left behind by old "
         "bleeding.", (0.0, 0.8, 0.0)),
+    # --- Growth arrangement: the new-growth vs organized-tissue discriminators
+    Feature("n_organized", "Are the epithelial cells arranged along pre-existing structures of the lung instead of forming new masses?",
+        "Look for the ordered layout of untouched tissue: a bronchial or airway wall with smooth "
+        "muscle or cartilage, a vessel with a muscular wall, or flat cells following thin alveolar "
+        "walls. Cells that respect these existing structures, with no mass or crowding, are "
+        "organized growth.", (-1.5, 2.5, -1.5)),
+    Feature("n_infiltrative", "Do epithelial structures invade the surrounding tissue haphazardly?",
+        "Look for growth that breaks the tissue layout: angulated or crooked glands punched into "
+        "dense pink fibrous tissue at odd angles, single cells or chains threading between "
+        "collagen bundles, or sheets plugging air spaces. Haphazard invasion means the cells are "
+        "building new, atypical structures.", (1.5, -2.5, 1.5)),
+    Feature("n_bland", "Are the epithelial nuclei uniform in size and shape and small relative to the cell body?",
+        "Compare the epithelial nuclei with each other: bland nuclei are alike, round to oval, "
+        "small, with smooth contours and even colour. Marked variation in size or shape, or large "
+        "lumpy nuclei, means the answer is no.", (-1.0, 2.0, -1.0)),
 )
 
 FEATURE_IDS = tuple(feature.id for feature in FEATURES)
@@ -278,6 +302,61 @@ PROLIFERATION_PATTERN_SIGNAL = {
     "neither_clear": (1 / 3, 1 / 3, 1 / 3),
 }
 
+# Stage-1 Choice: is the epithelium organized within pre-existing structures,
+# or is it new, infiltrative/expansile growth? This is the malignancy
+# discriminator that separates untouched tissue from a proliferation.
+ARRANGEMENT_TEXT = {
+    "pre_existing_structures": (
+        "The epithelial cells line or follow pre-existing structures of the lung — airway or "
+        "bronchial walls, vessel walls, or alveolar walls — in an orderly way. No new mass is "
+        "formed."
+    ),
+    "infiltrative_glands": (
+        "Newly formed glands — rings of cells around open lumens — invade the surrounding tissue "
+        "haphazardly, at odd angles, disregarding the existing layout. Solid sheets without gland "
+        "lumens do not fit this option."
+    ),
+    "expansile_solid_nests": (
+        "Solid cohesive nests or sheets of cells, without gland lumens, invade or replace the "
+        "tissue and destroy the existing layout."
+    ),
+    "no_proliferation": (
+        "The field shows no discernible epithelial proliferation: the cells present respect the "
+        "tissue layout with little crowding."
+    ),
+}
+ARRANGEMENT_SIGNAL = {
+    "pre_existing_structures": (0.0, 1.0, 0.0),
+    "infiltrative_glands": (1.0, 0.0, 0.0),
+    "expansile_solid_nests": (0.0, 0.0, 1.0),
+    "no_proliferation": (0.0, 1.0, 0.0),
+}
+
+# Stage-2 Choice: the glandular-vs-keratinizing tie-breaker, asked as one
+# contrastive forced choice. Independent yes/no questions default to agreement;
+# naming both alternatives and forcing the pick uses the model's discrimination.
+DIFFERENTIATION_TEXT = {
+    "gland_type": (
+        "Well-formed glands are visible: rings of cells around open lumens lined by tall cells, or "
+        "definite pale blue-grey mucin pools. Spaces that merely look gland-like, or pale material "
+        "without a formed gland, do not count. These are the tie-breakers of glandular "
+        "differentiation."
+    ),
+    "keratin_type": (
+        "Concentric whorls of bright pink keratin, fine spine-like bridges between neighbouring "
+        "cells, or dense opaque keratinizing cytoplasm are visible. These are the tie-breakers of "
+        "keratinizing differentiation."
+    ),
+    "both_present": "Clear tie-breakers of both kinds are visible in the field.",
+    "neither_clear": "No clear tie-breaker of either kind is visible.",
+}
+DIFFERENTIATION_SIGNAL = {
+    "gland_type": (1.0, 0.0, 0.0),
+    "keratin_type": (0.0, 0.0, 1.0),
+    "both_present": (0.5, 0.0, 0.5),
+    "neither_clear": (1 / 3, 1 / 3, 1 / 3),
+}
+
 
 def build_questions() -> dict[str, Any]:
     from typesafe_sdk import Choice, Noul
@@ -285,67 +364,65 @@ def build_questions() -> dict[str, Any]:
     questions: dict[str, Any] = {}
     for feature in FEATURES:
         questions[feature.id] = Noul(
-            instructions=f"{feature.ask}\n\nWhat to look for: {feature.look}",
+            instructions=f"{feature.ask}\n\nWhat to look for: {feature.look}{VIEWS}",
             criteria=dict(NOUL_CRITERIA),
         )
 
-    questions["profile"] = Choice(
-        instructions=(
-            "Which description best matches the dominant architecture in `sample`? Read the whole "
-            "field first, then pick the description whose pattern occupies the largest area."
-        ),
-        criteria={profile: PROFILE_TEXT[profile] for profile in PROFILE_IDS},
-    )
+    def choice(qid: str, instructions: str, criteria: dict[str, str]) -> None:
+        questions[qid] = Choice(instructions=f"{instructions}{VIEWS}", criteria=criteria)
+
+    choice("profile", (
+        "Which description best matches the dominant architecture in `sample`? Read the whole "
+        "field first, then pick the description whose pattern occupies the largest area."
+    ), {profile: PROFILE_TEXT[profile] for profile in PROFILE_IDS})
     # A second pass with a different order and a stricter framing. The two
     # probability vectors are averaged, which reduces option-order bias.
-    questions["profile_recheck"] = Choice(
-        instructions=(
-            "Judge the architecture, not the staining. Which description fits the majority of the "
-            "field in `sample`?"
-        ),
-        criteria={profile: PROFILE_TEXT[profile] for profile in ("p2", "p0", "p1")},
-    )
-    questions["cell_shape"] = Choice(
-        instructions=(
-            "Look only at the epithelial cells (the cells that form structures or sheets). What is "
-            "their dominant shape in `sample`?"
-        ),
-        criteria=CELL_SHAPE_TEXT,
-    )
-    questions["cytoplasm"] = Choice(
-        instructions=(
-            "Look at the cell body outside the nucleus of the epithelial cells. What is the dominant "
-            "cytoplasm in `sample`?"
-        ),
-        criteria=CYTOPLASM_TEXT,
-    )
-    questions["stroma"] = Choice(
-        instructions=(
-            "Look at what sits between the epithelial structures: the supporting tissue and the "
-            "background. What lies between them in `sample`?"
-        ),
-        criteria=STROMA_TEXT,
-    )
-    questions["proliferation_pattern"] = Choice(
-        instructions=(
-            "If `sample` contains a crowded epithelial proliferation (many cells growing together "
-            "and outgrowing the surrounding tissue), which pattern is the better fit? If it does not, "
-            "choose neither_clear."
-        ),
-        criteria=PROLIFERATION_PATTERN_TEXT,
-    )
+    choice("profile_recheck", (
+        "Judge the architecture, not the staining. Which description fits the majority of the "
+        "field in `sample`?"
+    ), {profile: PROFILE_TEXT[profile] for profile in ("p2", "p0", "p1")})
+    choice("cell_shape", (
+        "Look only at the epithelial cells (the cells that form structures or sheets). What is "
+        "their dominant shape in `sample`?"
+    ), CELL_SHAPE_TEXT)
+    choice("cytoplasm", (
+        "Look at the cell body outside the nucleus of the epithelial cells. What is the dominant "
+        "cytoplasm in `sample`?"
+    ), CYTOPLASM_TEXT)
+    choice("stroma", (
+        "Look at what sits between the epithelial structures: the supporting tissue and the "
+        "background. What lies between them in `sample`?"
+    ), STROMA_TEXT)
+    choice("proliferation_pattern", (
+        "If `sample` contains a crowded epithelial proliferation (many cells growing together "
+        "and outgrowing the surrounding tissue), which pattern is the better fit? If it does not, "
+        "choose neither_clear."
+    ), PROLIFERATION_PATTERN_TEXT)
+    choice("growth_arrangement", (
+        "Look at how the epithelial cells relate to the tissue layout in `sample`. Which "
+        "description fits?"
+    ), ARRANGEMENT_TEXT)
+    choice("differentiation", (
+        "When `sample` shows both gland-like structures and solid sheets, decide which "
+        "differentiation the cells are showing. Look for the tie-breakers named in each option "
+        "anywhere in `sample`, checking fine cellular detail on `detail`. Judge the type of "
+        "differentiation, not the largest texture."
+    ), DIFFERENTIATION_TEXT)
     return questions
 
 
 def question_signature() -> str:
     payload = {
         "version": PROTOCOL_VERSION,
+        "views": VIEWS,
         "features": [(feature.id, feature.ask, feature.look) for feature in FEATURES],
         "profiles": PROFILE_TEXT,
         "cell_shape": CELL_SHAPE_TEXT,
         "cytoplasm": CYTOPLASM_TEXT,
         "stroma": STROMA_TEXT,
         "proliferation_pattern": PROLIFERATION_PATTERN_TEXT,
+        "arrangement": ARRANGEMENT_TEXT,
+        "differentiation": DIFFERENTIATION_TEXT,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
 

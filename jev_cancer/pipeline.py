@@ -1,12 +1,13 @@
 """One Jev request per image.
 
-State: the image. Questions: 42 clinical observations with plain-language
-descriptions and 5 morphology Choices. No reference images, no labels, no
-boxes, no second request.
+State: the image at two views (`sample` = whole field, `detail` = centre at
+twice the magnification). Questions: 45 clinical observations with
+plain-language descriptions and 8 morphology Choices. No reference images, no
+labels, no boxes, no second request.
 
-Raw answers are cached per image under ``runs/<protocol>/raw`` so any subset or
-rerun only pays for images that have not been seen yet. The per-run output
-directory is keyed by the subset's fraction and seed.
+Raw answers are cached per image under ``runs/<dataset>/<protocol>/raw`` so any
+subset or rerun only pays for images that have not been seen yet. The per-run
+output directory is keyed by the subset's fraction and seed.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ from typesafe_sdk import Image as JevImage
 
 from . import config
 from .client import Jev, load_json, save_json
-from .index import load_rgb, subset_key
+from .index import load_detail, load_rgb, subset_key
 from .protocol import PROFILE_IDS, assert_no_leaks, build_questions, question_signature
 
 
@@ -40,9 +41,12 @@ def classify_one(jev: Jev, image_id: str, source: str, cache_dir: Path) -> dict[
 
     questions = build_questions()
     assert_no_leaks(questions)
-    image = JevImage.from_pil(load_rgb(source))
+    state = {
+        "sample": JevImage.from_pil(load_rgb(source)),
+        "detail": JevImage.from_pil(load_detail(source)),
+    }
     started = time.perf_counter()
-    response = jev.ask({"sample": image}, questions)
+    response = jev.ask(state, questions)
     response["latency_ms"] = round((time.perf_counter() - started) * 1000, 1)
     save_json(path, response)
     return {"image_id": image_id, "cached": False}

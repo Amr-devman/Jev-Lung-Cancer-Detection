@@ -153,3 +153,27 @@ def load_rgb(path: str | Path, max_side: int = config.MAX_SIDE) -> Image.Image:
     if max(image.size) > max_side:
         image.thumbnail((max_side, max_side), Image.Resampling.LANCZOS)
     return image
+
+
+def load_detail(
+    path: str | Path,
+    zoom: float = 2.0,
+    max_side: int = config.MAX_SIDE,
+) -> Image.Image:
+    """A high-power view of the same field: the centre cropped ``zoom`` times
+    and scaled back up.
+
+    A vision model resolves each image on a fixed token grid, so a 2x crop is
+    seen at twice the effective magnification — the view a pathologist takes
+    when switching to a high-power objective to judge keratin whorls,
+    intercellular bridges and nuclear detail. No dataset metadata is involved.
+    """
+    image = load_rgb(path, max_side=max_side * 2)
+    width, height = image.size
+    half_w, half_h = width / (2 * zoom), height / (2 * zoom)
+    box = (width / 2 - half_w, height / 2 - half_h, width / 2 + half_w, height / 2 + half_h)
+    detail = image.crop(box).resize(
+        (max_side, int(max_side * height / width)),
+        Image.Resampling.LANCZOS,
+    )
+    return detail

@@ -1,11 +1,13 @@
 # The Jev question bank
 
 `jev_cancer/protocol.py` is the executable version of this document. It contains
-42 yes/no observations and 6 multiple-choice questions. Every question is
-followed by a plain-language **what to look for** description, so the model is
-told what the observation means and what it looks like in pixels before it
-answers. The prompts name morphology only. They never name a diagnosis, a
-dataset folder, or a filename.
+45 yes/no observations and 8 multiple-choice questions, asked over two views of
+the same field — `sample` (whole field) and `detail` (centre at twice the
+magnification). Every question says which view to use and carries a
+plain-language **what to look for** description, so the model is told what the
+observation means and what it looks like in pixels before it answers. The
+prompts name morphology only. They never name a diagnosis, a dataset folder, or
+a filename.
 
 ## Design rules
 
@@ -95,6 +97,9 @@ against.
 | `b_macrophages` | Are there large cells with pale foamy cytoplasm sitting inside open spaces? | Large rounded cells with pale bubbly cytoplasm and small dark nuclei inside open spaces. | – | + | – |
 | `b_inflammation` | Is there a dense crowd of small round inflammatory cells? | Dense crowds of small round cells with almost no cytoplasm and dark round nuclei. | – | + | – |
 | `b_hemosiderin` | Is there golden-brown granular pigment within large cells? | Coarse golden-brown granules inside large cells, left by old bleeding. | – | + | – |
+| `n_organized` | Are the epithelial cells arranged along pre-existing structures of the lung instead of forming new masses? | The ordered layout of untouched tissue: bronchial/airway walls with smooth muscle or cartilage, vessels with muscular walls, flat cells following thin alveolar walls. | − | +++ | − |
+| `n_infiltrative` | Do epithelial structures invade the surrounding tissue haphazardly? | Growth that breaks the tissue layout: angulated glands punched into fibrous tissue at odd angles, cells threading between collagen bundles, sheets plugging air spaces. | ++ | −− | ++ |
+| `n_bland` | Are the epithelial nuclei uniform in size and shape and small relative to the cell body? | Nuclei that are alike, round to oval, small, smooth-contoured, evenly coloured — versus markedly variable or large lumpy ones. | − | ++ | − |
 
 ### Why these observations
 
@@ -138,8 +143,8 @@ weak evidence, not proof: a tumour can contain all of them.
 
 ## Multiple-choice questions
 
-Beside the architecture Choice (asked twice), three descriptive Choices and one
-growth-pattern Choice feed the fusion as soft evidence:
+Beside the architecture Choice (asked twice), five descriptive Choices and two
+decision Choices feed the fusion as soft evidence:
 
 | Choice | Question | Options |
 |---|---|---|
@@ -147,22 +152,33 @@ growth-pattern Choice feed the fusion as soft evidence:
 | `cytoplasm` | What is the dominant cytoplasm of the epithelial cells? | pale mucinous, dense eosinophilic, clear/vacuolated, foamy, scant |
 | `stroma` | What lies between the epithelial structures? | thin alveolar walls, dense fibrous, inflamed, necrotic, minimal |
 | `proliferation_pattern` | If there is a crowded epithelial proliferation, which pattern fits? | glandular, solid/squamoid, neither clear |
+| `growth_arrangement` | How do the epithelial cells relate to the tissue layout? | pre-existing structures, infiltrative glands, expansile solid nests, no proliferation |
+| `differentiation` | When both gland-like structures and solid sheets are present, which differentiation do the tie-breakers show? | gland type (formed glands/mucin), keratin type (whorls/bridges/dense keratin), both, neither |
 
 Each option is itself a short description ("pale, faintly blue-grey, abundant
 cytoplasm, often with a clear vacuole"), not a bare label, so the model compares
-descriptions rather than decoding category names.
+descriptions rather than decoding category names. `growth_arrangement` is the
+malignancy discriminator (organized within pre-existing structures vs new
+infiltrative/expansile growth); `differentiation` is the glandular-vs-keratinizing
+tie-breaker asked as one contrastive forced choice, which is more reliable than
+independent yes/no presence questions.
 
 ## How answers become a class
 
-Seven signals are computed independently from the one response:
+Nine signals are computed independently from the one response:
 
 - `profile` and `profile_recheck`: the two architecture Choice probability
   vectors;
-- `proliferation_pattern`, `cell_shape`, `cytoplasm`, `stroma`: each Choice
-  probability vector mapped through a fixed soft table onto p0/p1/p2;
-- `rubric`: the weighted 42-observation vector, passed through a softmax.
+- `proliferation_pattern`, `cell_shape`, `cytoplasm`, `stroma`,
+  `growth_arrangement`, `differentiation`: each Choice probability vector
+  mapped through a fixed soft table onto p0/p1/p2;
+- `rubric`: the weighted 45-observation vector, passed through a softmax.
 
-They are combined by a weighted mean with fixed clinical-prior weights
-(`fusion.WEIGHTS`). The result is a probability for `p0`, `p1`, `p2` plus a
+They are decoded as a two-stage hierarchical decision with fixed clinical-prior
+weights (`fusion.WEIGHTS`): **stage 1** decides normal tissue vs carcinoma from
+the signals that can judge it (architecture, arrangement, stroma, rubric);
+**stage 2** decides glandular vs keratinizing from the carcinoma-discriminating
+signals (architecture, growth pattern, differentiation, cytology, rubric). The
+result is a probability for `p0`, `p1`, `p2` plus both stage probabilities, a
 confidence and a margin. The grader reports the full distribution and a
 confidence/coverage curve rather than pretending every tile is decidable.

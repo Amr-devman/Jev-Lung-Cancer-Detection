@@ -1,17 +1,18 @@
-"""From Jev's answers to a profile.
+"""From Jev's answers to a class, as a two-stage hierarchical decision.
 
-There is no training and no reference image. Seven signals are combined with
-fixed clinical-prior weights:
+Stage 1 — normal tissue vs carcinoma. Only signals that can tell untouched
+tissue from a proliferation vote here (the architecture Choices, the growth
+arrangement Choice, the stroma Choice and the observation rubric), projected to
+a binary normal/carcinoma question.
 
-  profile               the architecture Choice
-  profile_recheck       the same Choice with reordered options
-  proliferation_pattern soft map of the growth-pattern Choice
-  rubric                the weighted 42-observation vector
-  cell_shape            soft map of the cell-shape Choice
-  cytoplasm             soft map of the cytoplasm Choice
-  stroma                soft map of the stroma Choice
+Stage 2 — glandular vs keratinizing, asked only once stage 1 says carcinoma.
+Only signals that can separate the two carcinomas vote here (the architecture
+Choices, the growth pattern Choice, the differentiation tie-breaker Choice and
+the observation rubric), projected to the gland/keratin pair.
 
-The output is a probability over p0/p1/p2 plus confidence and margin.
+The final probabilities are the hierarchical product: p(normal) from stage 1,
+p(gland) and p(keratin) as the carcinoma mass split by stage 2. Nothing is
+fitted; the weights are fixed clinical priors in ``WEIGHTS``.
 """
 
 from __future__ import annotations
@@ -21,26 +22,42 @@ from typing import Any
 import numpy as np
 
 from .config import PROFILE_IDS
-from .pipeline import feature_vector, profile_probabilities
+from .pipeline import feature_vector
 from .protocol import (
+    ARRANGEMENT_SIGNAL,
     CELL_SHAPE_SIGNAL,
     CYTOPLASM_SIGNAL,
+    DIFFERENTIATION_SIGNAL,
     PROLIFERATION_PATTERN_SIGNAL,
     STROMA_SIGNAL,
     rubric_vector,
 )
 
 WEIGHTS = {
-    "profile": 0.35,
-    "profile_recheck": 0.15,
-    "proliferation_pattern": 0.15,
+    "profile": 0.30,
+    "profile_recheck": 0.12,
+    "proliferation_pattern": 0.10,
     "rubric": 0.15,
-    "cell_shape": 0.08,
-    "cytoplasm": 0.07,
-    "stroma": 0.05,
+    "cell_shape": 0.06,
+    "cytoplasm": 0.06,
+    "stroma": 0.06,
+    "arrangement": 0.10,
+    "differentiation": 0.12,
 }
+STAGE1_SIGNALS = ("profile", "profile_recheck", "arrangement", "stroma", "rubric")
+STAGE2_SIGNALS = (
+    "profile", "profile_recheck", "proliferation_pattern",
+    "differentiation", "rubric", "cell_shape", "cytoplasm",
+)
 RUBRIC_TEMPERATURE = 6.0
 EPS = 1e-9
+
+# Identity map for the profile Choices: option label p0/p1/p2 -> one-hot.
+PROFILE_SIGNAL = {
+    "p0": (1.0, 0.0, 0.0),
+    "p1": (0.0, 1.0, 0.0),
+    "p2": (0.0, 0.0, 1.0),
+}
 
 
 def softmax(scores: np.ndarray, temperature: float = 1.0) -> np.ndarray:
@@ -68,8 +85,8 @@ def mapped_choice(response: dict[str, Any], key: str, mapping: dict[str, tuple])
 
 def build_signals(response: dict[str, Any]) -> dict[str, np.ndarray]:
     return {
-        "profile": np.array(profile_probabilities(response, "profile")),
-        "profile_recheck": np.array(profile_probabilities(response, "profile_recheck")),
+        "profile": mapped_choice(response, "profile", PROFILE_SIGNAL),
+        "profile_recheck": mapped_choice(response, "profile_recheck", PROFILE_SIGNAL),
         "proliferation_pattern": mapped_choice(
             response, "proliferation_pattern", PROLIFERATION_PATTERN_SIGNAL
         ),
@@ -77,31 +94,64 @@ def build_signals(response: dict[str, Any]) -> dict[str, np.ndarray]:
         "cell_shape": mapped_choice(response, "cell_shape", CELL_SHAPE_SIGNAL),
         "cytoplasm": mapped_choice(response, "cytoplasm", CYTOPLASM_SIGNAL),
         "stroma": mapped_choice(response, "stroma", STROMA_SIGNAL),
+        "arrangement": mapped_choice(response, "growth_arrangement", ARRANGEMENT_SIGNAL),
+        "differentiation": mapped_choice(response, "differentiation", DIFFERENTIATION_SIGNAL),
     }
 
 
-def fuse(signals: dict[str, np.ndarray]) -> np.ndarray:
+def _weighted_mean(vectors: list[np.ndarray]) -> np.ndarray:
     total = 0.0
-    combined = np.zeros(3)
-    for name, signal in signals.items():
-        weight = WEIGHTS.get(name, 0.0)
-        if weight <= 0:
-            continue
-        combined += weight * normalize(signal)
+    combined = np.zeros(len(vectors[0]))
+    for vector, weight in vectors:
+        combined += weight * vector
         total += weight
-    return combined / total if total > EPS else np.full(3, 1 / 3)
+    return combined / total if total > EPS else normalize(combined)
+
+
+def stage1_normal_probability(signals: dict[str, np.ndarray]) -> float:
+    """P(normal tissue) from the signals that can judge it."""
+    votes = []
+    for name in STAGE1_SIGNALS:
+        signal = signals.get(name)
+        if signal is None:
+            continue
+        binary = normalize(np.array([signal[1], signal[0] + signal[2]]))
+        votes.append((binary, WEIGHTS.get(name, 0.0)))
+    return float(_weighted_mean(votes)[0])
+
+
+def stage2_gland_probability(signals: dict[str, np.ndarray]) -> float:
+    """P(glandular | carcinoma) from the signals that can separate the two."""
+    votes = []
+    for name in STAGE2_SIGNALS:
+        signal = signals.get(name)
+        if signal is None:
+            continue
+        pair = normalize(np.array([signal[0], signal[2]]))
+        votes.append((pair, WEIGHTS.get(name, 0.0)))
+    return float(_weighted_mean(votes)[0])
 
 
 def predict(response: dict[str, Any]) -> dict[str, Any]:
     signals = build_signals(response)
-    fused = fuse(signals)
-    order = np.argsort(fused)[::-1]
-    top = int(order[0])
+    normal = stage1_normal_probability(signals)
+    gland = stage2_gland_probability(signals)
+    probabilities = {
+        "p1": normal,
+        "p0": (1.0 - normal) * gland,
+        "p2": (1.0 - normal) * (1.0 - gland),
+    }
+    order = sorted(probabilities, key=probabilities.get, reverse=True)
+    top = order[0]
     return {
-        "profile": PROFILE_IDS[top],
-        "probabilities": {profile: float(fused[i]) for i, profile in enumerate(PROFILE_IDS)},
-        "confidence": float(fused[top]),
-        "margin": float(fused[top] - fused[order[1]]),
+        "profile": top,
+        "probabilities": probabilities,
+        "confidence": probabilities[top],
+        "margin": probabilities[top] - probabilities[order[1]],
+        "stages": {
+            "normal_vs_carcinoma": {"normal": normal, "carcinoma": 1.0 - normal},
+            "gland_vs_keratin": {"gland": gland, "keratin": 1.0 - gland},
+        },
         "signals": {
             name: {profile: float(value[i]) for i, profile in enumerate(PROFILE_IDS)}
             for name, value in signals.items()
